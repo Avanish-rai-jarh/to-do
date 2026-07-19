@@ -6,7 +6,11 @@ function App() {
     {/* navbar */}
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div className="container-fluid">
+<<<<<<< HEAD
     <a className="navbar-brand" href="#"><i class="fa-solid fa-house"></i></a>
+=======
+    <a className="navbar-brand" href="#home"><i class="fa-solid fa-house"></i></a>
+>>>>>>> 33047402c966c3f337eaaa9cc2a71e2e15d3f69f
     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span className="navbar-toggler-icon"></span>
     </button>
