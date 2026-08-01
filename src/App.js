@@ -50,7 +50,7 @@ const over=document.querySelector('.overlay');
 
   day=arr[d.getDay()]
 
-  if(task!="" && date!="" && type!=""){
+  if(task!=="" && date!=="" && type!==""){
   data.innerHTML+=`<div class="form-check">
   <input class="form-check-input" type="checkbox" value="" id="checkDefault">
   <div>
@@ -88,7 +88,7 @@ const over=document.querySelector('.overlay');
   document.querySelector(".overlay").classList.remove("overlay1");
   }
 
-  if(task=="" || date=="" || type==""){
+  if(task==="" || date==="" || type===""){
     alert("Please fill all the fields");
   }
 
