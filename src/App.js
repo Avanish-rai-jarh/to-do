@@ -40,7 +40,12 @@ function App() {
     </div>
   </div>
 </nav>
-    </>
+
+{/**add **/}
+     <div className="a1">
+      <i class="fa-solid fa-circle-plus"></i>
+     </div>
+</>
   );
 }
 

@@ -1,3 +1,39 @@
 
+body{
+    background-color: #150332;
+    margin: 0;
+    padding: 0;
+}
+
+.a1{
+    position:fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 999;
+    border-radius: 50%;
+}
+
+
+.fa-circle-plus{
+    color: #583296;
+    font-size:40px;
+}
+
+.fa-circle-plus:hover{
+    font-size: 45px;
+    border-radius: 50%;
+    border:2px solid #10a484;
+    color:rgb(19, 63, 63);
+    transition:all 0.09s ease-in-out;
+}
+
+.fa-circle-plus:touch{
+    font-size: 45px;
+    border-radius: 50%;
+    border:2px solid #10a484;
+    color:rgb(19, 63, 63);
+    transition:all 0.09s ease-in-out;
+}
+
 
 
