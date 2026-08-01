@@ -92,7 +92,7 @@ const over=document.querySelector('.overlay');
     alert("Please fill all the fields");
   }
 
-  if(data.innerHTML==""){
+  if(data.innerHTML===""){
     document.querySelector(".saving").classList.add("savingStyle");
   }
 
