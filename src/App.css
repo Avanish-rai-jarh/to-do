@@ -1,8 +1,11 @@
 
 body{
-    background-color: #150332;
+    background-color: #13042d;
 }
 
+.navbar{
+    z-index: 1011;
+}
 .a1{
     position:fixed;
     bottom: 40px;
@@ -14,16 +17,16 @@ body{
 
 .fa-circle-plus{
     color: #583296;
-    font-size:40px;
+    font-size:50px;
     z-index: 999;
 }
 
 .fa-circle-plus:hover{
-    font-size: 45px;
+    font-size: 60px;
     border-radius: 50%;
     border:2px solid #10a484;
     color:rgb(19, 63, 63);
-    transition:all 0.1s ease-in-out;
+    transition:all 1s ease;
 }
 
 .fa-circle-plus:touch{
@@ -44,9 +47,11 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-    background-color:rgb(170, 16, 194);
+    font-size:17px;
+    color:black;
+    background-color:#4E1F6E;
     z-index:1000;
-    border-radius:2%;
+    border-radius:0.5%;
 }
 
 .ip20{
@@ -99,11 +104,10 @@ outline:none;
 
 .savingStyle{
     position:fixed;
-    top:0px;
+    top:80px;
     left:0px;
-    height:100%;
+    height:80%;
     width:100%;
-    width:calc(100%-20px);
     display:flex;
     justify-content:center;
     align-items:center;
@@ -119,8 +123,18 @@ outline:none;
 .form-check{
     border:none;
     background-color: #0a0118;
-    margin:20px;
+    margin-top:70px;
+    margin-left:5%;
+    margin-right:5%;
     z-index:991;
+}
+
+.form-check:hover{
+    background-color:#140828;
+    margin-left:4%;
+    margin-right:4%;
+    border:2px solid rgb(27, 3, 48) ;
+    transition:all 0.5s ease-in;
 }
 
 .l1{
@@ -138,3 +152,81 @@ outline:none;
     color: rgb(154, 16, 16);
 }
 
+.Message1{
+    display:none;
+    justify-content: space-between;
+    align-items:center;
+    height: 40px;
+    position:fixed;
+    bottom:20px;
+    left:10%;
+    right:10%;
+    width:80%;
+    z-index:998;
+    background-color:white;
+    color:rgb(61, 61, 156);
+    border-radius: 1%;
+}
+
+
+.show{
+    display:flex;
+    transition:all 5s ease-in-out;
+}
+
+.fa-book-open{
+    color:rgb(10, 141, 130);
+    background-color: #0a0118;
+    font-size: 35px;
+}
+
+.colaps{
+    display:block;
+    width: 100%-40%;;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.extra{
+    width: 100%;
+    display:flex;
+    justify-content: end;
+}
+
+.extra1{
+    margin-right:50px;
+}
+.extra2{
+    margin-right:5px;
+}
+
+.fa-star{
+    font-size: 20px;
+    color:rgb(174, 157, 157);
+}
+
+.fa-pen-to-square{
+    font-size: 20px;
+    color:rgb(174, 157, 157);
+}
+
+.btn-outline-primary{
+    margin:10px;
+}
+
+.navh,.navb{
+    display:flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.offcanvas{
+    width:0px;
+    transition:all 1.5s ease;
+}
+
+.btn-link{
+    text-decoration: none;
+    font-size: 15px;
+}

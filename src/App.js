@@ -1,4 +1,14 @@
 import './App.css';
+
+// // for bookmark
+// function addbook(){
+
+// }
+// // for editing
+// function editing(){
+  
+// }
+
 function addchecks(){
   let task="";
   let date="";
@@ -38,6 +48,8 @@ const over=document.querySelector('.overlay');
 
  sv.addEventListener("click",()=>{
   const data=document.querySelector('.todo');
+
+
   task=document.querySelector('.ip20').value;
   date=document.querySelector('.ip21').value;
   type=document.querySelector('.ip22').value;
@@ -52,9 +64,9 @@ const over=document.querySelector('.overlay');
 
   if(task!=="" && date!=="" && type!==""){
   data.innerHTML+=`<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="" id="checkDefault">
+  <input class="form-check-input tasks" type="checkbox" value="" id="checkDefault">
   <div>
-  <label class="form-check-label l1" for="checkDefault">
+  <label class="form-check-label l1 colaps" for="checkDefault">
   ${task}
   </label>
 
@@ -78,24 +90,64 @@ const over=document.querySelector('.overlay');
 
   <div>
 
+  <div class="extra">
+  <div class="extra1"><i class="fa-regular fa-star"></i></div>
+  <div class="extra2"><i class="fa-regular fa-pen-to-square"></i></div>
+  </div>
+
   </div>`;
 
-   document.querySelector(".saving").innerHTML="";
-   document.querySelector(".saving").classList.remove("savingStyle");
+  document.querySelector(".saving").innerHTML="";
+  document.querySelector(".saving").classList.remove("savingStyle");
 
-   document.querySelector('.con1').innerHTML=''; 
+  document.querySelector('.con1').innerHTML=''; 
   document.querySelector('.con1').classList.remove('style1');
   document.querySelector(".overlay").classList.remove("overlay1");
   }
 
+  let checkboxes=document.querySelectorAll(".tasks");
+
+  checkboxes.forEach(checkbox => {
+    if(checkbox.hasAttribute("data-added")){
+      return;
+    }
+
+  checkbox.setAttribute=("data-added","true");
+
+    checkbox.addEventListener("change",(e)=>{
+      if(e.target.checked===true){
+        let div=e.target.parentElement;
+        let clicking=document.querySelector(".btn-link");
+        let showing=document.querySelector(".Message1");
+        e.target.parentElement.remove();
+        showing.classList.add("show");
+        clicking.onclick=(e)=>{
+          if(!data.contains(div)){
+            data.prepend(div);
+            div.querySelector(".tasks").checked=false;
+            document.querySelector(".saving").innerHTML="";
+            document.querySelector(".saving").classList.remove("savingStyle");
+          }
+          };
+
+        setTimeout(()=>{
+          showing.classList.remove("show");
+        },2000);
+
+        if(data.innerHTML===""){
+          let prestyle=document.querySelector(".saving")
+          prestyle.innerHTML=`<i class="fa-solid fa-book-open"></i>
+          <h3 class="default">No Tasks Added</h3>`;
+          prestyle.classList.add("savingStyle");
+          }
+        
+      }
+    });
+  });
+
   if(task==="" || date==="" || type===""){
     alert("Please fill all the fields");
   }
-
-  if(data.innerHTML===""){
-    document.querySelector(".saving").classList.add("savingStyle");
-  }
-
  });
 
  cl.addEventListener('click', () =>{
@@ -113,39 +165,94 @@ function App() {
   return (
     <>
     {/* navbar */}
-<nav className="navbar navbar-expand-lg bg-body-tertiary">
+<nav className="navbar navbar-dark bg-dark fixed-top">
   <div className="container-fluid">
-    <a className="navbar-brand" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE"><i className="fa-solid fa-house"></i></a>
-    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <a className="navbar-brand" href="#">Regular Task</a>
+    <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
       <span className="navbar-toggler-icon"></span>
     </button>
-    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-        <li className="nav-item">
-          <a className="nav-link active" aria-current="page" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE">Home</a>
-        </li>
-        <li className="nav-item">
-          <a className="nav-link" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE">Link</a>
-        </li>
-        <li className="nav-item dropdown">
-          <a className="nav-link dropdown-toggle" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Dropdown
-          </a>
-          <ul className="dropdown-menu">
-            <li><a className="dropdown-item" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE">Action</a></li>
-            <li><a className="dropdown-item" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE">Another action</a></li>
-            <li><hr className="dropdown-divider"/></li>
-            <li><a className="dropdown-item" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE">Something else here</a></li>
-          </ul>
-        </li>
-        <li className="nav-item">
-          <a className="nav-link disabled" aria-disabled="true" href="https://www.bing.com/search?q=google&FORM=ANAB01&adppc=EDGEDBB&PC=SCOOBE">Disabled</a>
-        </li>
-      </ul>
-      <form className="d-flex" role="search">
-        <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-        <button className="btn btn-outline-primary" type="submit">Search</button>
-      </form>
+    <div className="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+      <div className="offcanvas-header">
+        <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">Dark offcanvas</h5>
+        <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div className="offcanvas-body">
+        <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+          <li className="nav-item">
+            <div className="navh">
+            <div><i class="fa-solid fa-house"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Home</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i className="fa-regular fa-bookmark"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Bookmark</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i className="fa-solid fa-plus"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Add Task</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i className="fa-solid fa-recycle"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Trash</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i class="fa-solid fa-circle-info"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">About</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i className="fa-solid fa-list-check"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Todays's Task</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i class="fa-solid fa-arrow-up-wide-short"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Sort</button>
+            </div>
+            </div>
+          </li>
+
+          <li className="nav-item">
+            <div className="navb">
+            <div><i class="fa-solid fa-calendar-days"></i></div>
+            <div>
+            <button type="button" className="btn btn-outline-primary">Remainders</button>
+            </div>
+            </div>
+          </li>
+
+
+        </ul>
+      </div>
     </div>
   </div>
 </nav>
@@ -157,16 +264,23 @@ function App() {
 
   {/* {collection div} */}
   <div className="saving savingStyle">
-    <h3 class="default">No tasks added</h3>
+    <i className="fa-solid fa-book-open"></i>
+    <h3 className="default">No Tasks Added</h3>
   </div>
   <div className="todo">
-
-
   </div>
 
   {/* {function save form} */} 
   <div className="con1"></div>
   <div className="overlay"></div>
+
+  {/* recover */}
+
+  <div className="Message1">
+    <div className="text1">Task is finished</div>
+    <div className="textbt"><button type="button" className="btn btn-link">Undo</button></div>
+  </div>
+
 </>
   );
 }
