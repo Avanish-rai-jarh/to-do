@@ -165,7 +165,7 @@ function App() {
   return (
     <>
     {/* navbar */}
-<nav className="navbar navbar-dark bg-dark fixed-top">
+<nav className="navbar navbar-dark bg-primary fixed-top">
   <div className="container-fluid">
     <label className="navbar-brand" href="/">Regular Task</label>
     <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
