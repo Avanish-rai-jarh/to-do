@@ -51,12 +51,17 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:17px;
-    color:black;
-    background-color:#ee5fb9;
+    font-size:20px;
+    color:white;
+    background-color:rgb(65, 4, 100);
     opacity:0.6;
     z-index:1000;
     border-radius:0.5%;
+}
+.style1:hover{
+    border:2px solid blueviolet;
+    transition:all 0.9s ease;
+    transform: translateY(60px);
 }
 
 .ip20{
@@ -85,9 +90,9 @@ outline:none;
 }
 
 .ip20:hover,.ip21:hover,.ip22:hover{
-    background-color: rgb(46, 112, 210);
-    border: 1px solid green;
-    transition:all 1s ease;
+    border: 3px solid rgb(57, 5, 70);
+    transition:all 0.8s ease-in-out;
+    transform:translateY(-4px);
 }
 
 .form1{
@@ -146,25 +151,38 @@ outline:none;
 }
 
 .form-check:hover{
-    background-color:#140828;
+    background-color:rgb(4, 42, 92);
     margin-left:4%;
     margin-right:4%;
-    border:2px solid rgb(27, 3, 48) ;
+    cursor:pointer;
+    border:2px solid rgb(31, 121, 109) ;
+    .feature{
+        background-color:rgb(3, 4, 64);
+    };
     transition:all 0.5s ease-in;
+    transform:translateX();
 }
 
 .l1{
-    color: rgb(219, 185, 140);
+    font-size: 25px;
+    font-weight:500;
+    color: rgb(240, 239, 241);
 }
 .l2{
-    color: rgb(19, 63, 1);
+    font-size: 15px;
+    font-weight:500;
+    color: rgb(227, 225, 228);
 }
 
 .l3{
+    font-size: 15px;
+    font-weight:500;
     color: rgb(154, 16, 16);
 }
 
 .l4{
+    font-size: 15px;
+    font-weight:500;
     color: rgb(154, 16, 16);
 }
 
@@ -239,14 +257,19 @@ outline:none;
 
 .offcanvas{
     width:220px !important;
-    transition:all 1.5s ease;
+    transition:all 0.8s ease;
+    background:rgba(0,0,0,0.5) !important;
 }
 
 .offcanvas-header{
-    padding-top:50px !important
+    padding-top:50px !important;
 }
 
 .btn-link{
     text-decoration: none;
     font-size: 15px;
+}
+
+.form-check-input{
+    cursor:pointer;
 }

@@ -1,0 +1,17 @@
+.feature{
+    margin-right:75px;
+    border-radius:5%;
+    color:lab(100% 0.01 -0.01);
+    background:transparent;
+    opacity:50%;
+    border:0px solid grey;
+    outline:none;
+    font-weight:600;
+    font-size:15px;
+    z-index:1111;
+    cursor:auto !important;
+}
+
+.starStyle{
+    color: rgb(189, 150, 25) !important;
+}

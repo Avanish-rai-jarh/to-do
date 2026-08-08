@@ -1,14 +1,6 @@
 import './App.css';
-
-// // for bookmark
-// function addbook(){
-
-// }
-// // for editing
-// function editing(){
-  
-// }
-
+import './Appplus.css';
+let star=false;
 function addchecks(){
   let task="";
   let date="";
@@ -91,11 +83,32 @@ const over=document.querySelector('.overlay');
   <div>
 
   <div class="extra">
+  <button class="feature">${type}</button>
   <div class="extra1"><i class="fa-regular fa-star"></i></div>
   <div class="extra2"><i class="fa-regular fa-pen-to-square"></i></div>
   </div>
 
   </div>`;
+
+  let star1=document.querySelector(".fa-star");
+
+  star1.addEventListener("click",()=>{
+    star1.classList.add(".starStyle");
+    console.log(star1.className);
+    if(star===false){
+      star1.classList.remove("fa-regular");
+      star1.classList.add("fa-solid");
+      star1.classList.add("starStyle");
+      star=true;
+    }
+    else{
+      star1.classList.remove("fa-solid");
+      star1.classList.remove("starStyle");
+      star1.classList.add("fa-regular");
+      star=false;
+    }
+  });
+
 
   document.querySelector(".saving").innerHTML="";
   document.querySelector(".saving").classList.remove("savingStyle");
@@ -158,6 +171,7 @@ const over=document.querySelector('.overlay');
   document.querySelector('.con1').classList.remove('style1');
   document.querySelector(".overlay").classList.remove("overlay1");
  });
+
 }
 
 
@@ -280,7 +294,6 @@ function App() {
     <div className="text1">Task is finished</div>
     <div className="textbt"><button type="button" className="btn btn-link">Undo</button></div>
   </div>
-
 </>
   );
 }
