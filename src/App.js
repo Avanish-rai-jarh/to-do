@@ -1,9 +1,125 @@
+import React, {useEffect} from 'react';
 import './App.css';
 import './Appplus.css';
+
+function savetask(){
+  const td=document.querySelector(".todo");
+  const pp=document.querySelector(".pop1");
+
+  localStorage.setItem("todotasks",td.innerHTML);
+  localStorage.setItem("startask",pp.innerHTML);
+}
+function loadtask() {
+  let data = document.querySelector(".todo");
+  let saved = localStorage.getItem("todotasks");
+
+  if (saved) {
+    data.innerHTML = saved;
+
+    // Show restored tasks
+    data.style.display = "flex";
+
+    // Hide "No Tasks Added"
+    document.querySelector(".saving").innerHTML = "";
+    document.querySelector(".saving").classList.remove("savingStyle");
+  }
+  else {
+    data.innerHTML = "";
+    data.style.display = "none";
+
+    document.querySelector(".saving").innerHTML = `
+      <i class="fa-solid fa-book-open"></i>
+      <h3 class="default">No Tasks Added</h3>
+    `;
+
+    document.querySelector(".saving").classList.add("savingStyle");
+  }
+}
+
+
+function addStarEvents(){
+const data=document.querySelector('.todo');
+  const saveStar=document.querySelector('.pop1');
+
+let star1=document.querySelectorAll(".form-check .fa-star");
+for(let i=0;i<star1.length;i+=1){
+let starred=star1[i];
+
+starred.addEventListener("click",()=>{
+let tsk=starred.closest(".form-check");
+if(!starred.classList.contains("starStyle")){
+starred.classList.remove("fa-regular");
+starred.classList.add("fa-solid");
+starred.classList.add("starStyle");
+saveStar.appendChild(tsk);  
+
+savetask();
+}
+else{
+starred.classList.remove("fa-solid");
+starred.classList.remove("starStyle");
+starred.classList.add("fa-regular");
+data.appendChild(tsk);
+
+savetask()
+}
+});
+}
+}
+
+function addCheckBoxEvent(){
+  const data=document.querySelector('.todo');
+  // const saveStar=document.querySelector('.pop1');
+    let checkboxes=document.querySelectorAll(".tasks");
+
+  checkboxes.forEach(checkbox => {
+    if(checkbox.hasAttribute("data-added")){
+      return;
+    }
+
+  checkbox.setAttribute("data-added","true");
+
+    checkbox.addEventListener("change",(e)=>{
+      if(e.target.checked===true){
+        let div=e.target.parentElement;
+        let clicking=document.querySelector(".btn-link");
+        let showing=document.querySelector(".Message1");
+        e.target.parentElement.remove();
+
+        savetask();
+
+        showing.classList.add("show");
+        clicking.onclick=(e)=>{
+          if(!data.contains(div)){
+            data.prepend(div);
+            div.querySelector(".tasks").checked=false;
+            document.querySelector(".saving").innerHTML="";
+            document.querySelector(".saving").classList.remove("savingStyle");
+          }
+          };
+
+        setTimeout(()=>{
+          showing.classList.remove("show");
+        },2000);
+
+        if(data.children.length===0){
+          let prestyle=document.querySelector(".saving")
+          prestyle.innerHTML=`<i class="fa-solid fa-book-open"></i>
+          <h3 class="default">No Tasks Added</h3>`;
+          prestyle.classList.add("savingStyle");
+          }
+        
+      }
+    });
+  });
+}
+
 function addchecks(){
   let task="";
   let date="";
   let type="";
+  const data=document.querySelector('.todo');
+  const saveStar=document.querySelector('.pop1');
 const s = document.querySelector('.con1');
 const over=document.querySelector('.overlay');
   over.classList.add("overlay1");
@@ -54,7 +170,7 @@ const over=document.querySelector('.overlay');
   day=arr[d.getDay()]
 
   if(task!=="" && date!=="" && type!==""){
-  data.innerHTML+=`<div class="form-check">
+  data.insertAdjacentHTML("beforeend",`<div class="form-check">
   <input class="form-check-input tasks" type="checkbox" value="" id="checkDefault">
   <div>
   <label class="form-check-label l1 colaps" for="checkDefault">
@@ -87,29 +203,37 @@ const over=document.querySelector('.overlay');
   <div class="extra2"><i class="fa-regular fa-pen-to-square"></i></div>
   </div>
 
-  </div>`;
+  </div>`);
 
-  let star1=document.querySelectorAll(".fa-star");
+  savetask();
+
+  addStarEvents();
+  addCheckBoxEvent();
+  // let star1=document.querySelectorAll(".fa-star");
   
-  for(let i=0;i<star1.length;i+=1){
-    let starred=star1[i];
+  // for(let i=0;i<star1.length;i+=1){
+  //   let starred=star1[i];
 
-    starred.addEventListener("click",()=>{
-      let tsk=starred.closest(".form-check");
-      if(!starred.classList.contains("starStyle")){
-      starred.classList.remove("fa-regular");
-      starred.classList.add("fa-solid");
-      starred.classList.add("starStyle");
-      saveStar.appendChild(tsk);      
-    }
-    else{
-      starred.classList.remove("fa-solid");
-      starred.classList.remove("starStyle");
-      starred.classList.add("fa-regular");
-      data.appendChild(tsk);
-    }
-    });
-  }
+  //   starred.addEventListener("click",()=>{
+  //     let tsk=starred.closest(".form-check");
+  //     if(!starred.classList.contains("starStyle")){
+  //     starred.classList.remove("fa-regular");
+  //     starred.classList.add("fa-solid");
+  //     starred.classList.add("starStyle");
+  //     saveStar.appendChild(tsk);  
+      
+  //     savetask();
+  //   }
+  //   else{
+  //     starred.classList.remove("fa-solid");
+  //     starred.classList.remove("starStyle");
+  //     starred.classList.add("fa-regular");
+  //     data.appendChild(tsk);
+
+  //     savetask()
+  //   }
+  //   });
+  // }
 
   let h=document.querySelector(".btn1");
   let st=document.querySelector(".btn2");
@@ -139,45 +263,49 @@ const over=document.querySelector('.overlay');
   
   }
 
-  let checkboxes=document.querySelectorAll(".tasks");
+  addCheckBoxEvent();
+  // let checkboxes=document.querySelectorAll(".tasks");
 
-  checkboxes.forEach(checkbox => {
-    if(checkbox.hasAttribute("data-added")){
-      return;
-    }
+  // checkboxes.forEach(checkbox => {
+  //   if(checkbox.hasAttribute("data-added")){
+  //     return;
+  //   }
 
-  checkbox.setAttribute=("data-added","true");
+  // checkbox.setAttribute("data-added","true");
 
-    checkbox.addEventListener("change",(e)=>{
-      if(e.target.checked===true){
-        let div=e.target.parentElement;
-        let clicking=document.querySelector(".btn-link");
-        let showing=document.querySelector(".Message1");
-        e.target.parentElement.remove();
-        showing.classList.add("show");
-        clicking.onclick=(e)=>{
-          if(!data.contains(div)){
-            data.prepend(div);
-            div.querySelector(".tasks").checked=false;
-            document.querySelector(".saving").innerHTML="";
-            document.querySelector(".saving").classList.remove("savingStyle");
-          }
-          };
+  //   checkbox.addEventListener("change",(e)=>{
+  //     if(e.target.checked===true){
+  //       let div=e.target.parentElement;
+  //       let clicking=document.querySelector(".btn-link");
+  //       let showing=document.querySelector(".Message1");
+  //       e.target.parentElement.remove();
 
-        setTimeout(()=>{
-          showing.classList.remove("show");
-        },2000);
+  //       savetask();
 
-        if(data.children.length===0){
-          let prestyle=document.querySelector(".saving")
-          prestyle.innerHTML=`<i class="fa-solid fa-book-open"></i>
-          <h3 class="default">No Tasks Added</h3>`;
-          prestyle.classList.add("savingStyle");
-          }
+  //       showing.classList.add("show");
+  //       clicking.onclick=(e)=>{
+  //         if(!data.contains(div)){
+  //           data.prepend(div);
+  //           div.querySelector(".tasks").checked=false;
+  //           document.querySelector(".saving").innerHTML="";
+  //           document.querySelector(".saving").classList.remove("savingStyle");
+  //         }
+  //         };
+
+  //       setTimeout(()=>{
+  //         showing.classList.remove("show");
+  //       },2000);
+
+  //       if(data.children.length===0){
+  //         let prestyle=document.querySelector(".saving")
+  //         prestyle.innerHTML=`<i class="fa-solid fa-book-open"></i>
+  //         <h3 class="default">No Tasks Added</h3>`;
+  //         prestyle.classList.add("savingStyle");
+  //         }
         
-      }
-    });
-  });
+  //     }
+  //   });
+  // });
 
   if(task==="" || date==="" || type===""){
     alert("Please fill all the fields");
@@ -197,6 +325,11 @@ const over=document.querySelector('.overlay');
 
 
 function App() {
+  // local storage load
+  useEffect(()=>{
+    loadtask();
+  },[]);
+
   return (
     <>
     {/* navbar */}
@@ -215,7 +348,7 @@ function App() {
         <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
           <li className="nav-item">
             <div className="navh">
-            <div><i class="fa-solid fa-house"></i></div>
+            <div><i className="fa-solid fa-house"></i></div>
             <div>
             <button type="button" className="btn btn-outline-primary btn1">Home</button>
             </div>
@@ -224,7 +357,7 @@ function App() {
 
           <li className="nav-item">
             <div className="navb">
-            <div><i class="fa-regular fa-star" style={{color: "rgb(255, 255, 255)"}}></i></div>
+            <div><i className="fa-regular fa-star" style={{color: "rgb(255, 255, 255)"}}></i></div>
             <div>
             <button type="button" className="btn btn-outline-primary btn2">Starred</button>
             </div>
@@ -251,7 +384,7 @@ function App() {
 
           <li className="nav-item">
             <div className="navb">
-            <div><i class="fa-solid fa-circle-info"></i></div>
+            <div><i className="fa-solid fa-circle-info"></i></div>
             <div>
             <button type="button" className="btn btn-outline-primary btn5">About</button>
             </div>
@@ -269,7 +402,7 @@ function App() {
 
           <li className="nav-item">
             <div className="navb">
-            <div><i class="fa-solid fa-arrow-up-wide-short"></i></div>
+            <div><i className="fa-solid fa-arrow-up-wide-short"></i></div>
             <div>
             <button type="button" className="btn btn-outline-primary btn7">Sort</button>
             </div>
@@ -278,7 +411,7 @@ function App() {
 
           <li className="nav-item">
             <div className="navb">
-            <div><i class="fa-solid fa-calendar-days"></i></div>
+            <div><i className="fa-solid fa-calendar-days"></i></div>
             <div>
             <button type="button" className="btn btn-outline-primary btn8">Remainders</button>
             </div>
