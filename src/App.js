@@ -481,13 +481,18 @@ function addNavigationEvents() {
 
   let h = document.querySelector(".btn1");
   let st = document.querySelector(".btn2");
+  let plus = document.querySelector(".disl");
 
   h.onclick = function () {
     showView("home");
+    plus.style.pointerEvents = "auto";
+    plus.style.opacity = "1";
   };
 
   st.onclick = function () {
     showView("starred");
+    plus.style.pointerEvents = "none";
+    plus.style.opacity = "0.5";
   };
 }
 
