@@ -8,10 +8,32 @@
     outline:none;
     font-weight:600;
     font-size:15px;
-    z-index:1111;
+    z-index:700;
     cursor:auto !important;
 }
 
 .starStyle{
     color: rgb(189, 150, 25) !important;
+}
+
+.todo{
+    position:fixed;
+    top:0px;
+    left:0px;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items: center;
+}
+
+.pop1{
+    display:none;
+    flex-direction:column;
+    align-items: center;
+    position:fixed;
+    top:0px;
+    left:0px;
+    width:100%;
+    height:100%;
 }

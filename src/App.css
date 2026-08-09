@@ -127,7 +127,7 @@ outline:none;
     position:fixed;
     top:80px;
     left:0px;
-    height:80%;
+    height:100%;
     width:100%;
     display:flex;
     justify-content:center;
@@ -142,11 +142,13 @@ outline:none;
 }
 
 .form-check{
+    height:175px;
     border:none;
     background-color: #0a0118;
-    margin-top:90px;
     margin-left:5%;
     margin-right:5%;
+    margin-top:90px;
+    width:90%;
     z-index:991;
 }
 
@@ -160,7 +162,7 @@ outline:none;
         background-color:rgb(3, 4, 64);
     };
     transition:all 0.5s ease-in;
-    transform:translateX();
+    transform:translateY(-5px);
 }
 
 .l1{
@@ -273,3 +275,4 @@ outline:none;
 .form-check-input{
     cursor:pointer;
 }
+

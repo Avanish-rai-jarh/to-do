@@ -1,6 +1,5 @@
 import './App.css';
 import './Appplus.css';
-let star=false;
 function addchecks(){
   let task="";
   let date="";
@@ -40,7 +39,7 @@ const over=document.querySelector('.overlay');
 
  sv.addEventListener("click",()=>{
   const data=document.querySelector('.todo');
-
+  const saveStar=document.querySelector('.pop1');
 
   task=document.querySelector('.ip20').value;
   date=document.querySelector('.ip21').value;
@@ -90,25 +89,46 @@ const over=document.querySelector('.overlay');
 
   </div>`;
 
-  let star1=document.querySelector(".fa-star");
+  let star1=document.querySelectorAll(".fa-star");
+  
+  for(let i=0;i<star1.length;i+=1){
+    let starred=star1[i];
 
-  star1.addEventListener("click",()=>{
-    star1.classList.add(".starStyle");
-    console.log(star1.className);
-    if(star===false){
-      star1.classList.remove("fa-regular");
-      star1.classList.add("fa-solid");
-      star1.classList.add("starStyle");
-      star=true;
+    starred.addEventListener("click",()=>{
+      let tsk=starred.closest(".form-check");
+      if(!starred.classList.contains("starStyle")){
+      starred.classList.remove("fa-regular");
+      starred.classList.add("fa-solid");
+      starred.classList.add("starStyle");
+      saveStar.appendChild(tsk);      
     }
     else{
-      star1.classList.remove("fa-solid");
-      star1.classList.remove("starStyle");
-      star1.classList.add("fa-regular");
-      star=false;
+      starred.classList.remove("fa-solid");
+      starred.classList.remove("starStyle");
+      starred.classList.add("fa-regular");
+      data.appendChild(tsk);
     }
-  });
+    });
+  }
 
+  let h=document.querySelector(".btn1");
+  let st=document.querySelector(".btn2");
+  h.onclick=function(){
+      document.querySelector(".pop1").style. display="none";
+      document.querySelector(".todo").style.display="flex";
+
+      document.querySelector(".disl").style.pointerEvents="auto";
+
+      document.querySelector(".disl").style.opacity="1";
+  }
+  st.onclick=function(){
+      document.querySelector(".todo").style.display="none";
+      document.querySelector(".pop1").style.display="flex";
+
+      document.querySelector(".disl").style.pointerEvents="none";
+
+      document.querySelector(".disl").style.opacity="0.5";
+  }
 
   document.querySelector(".saving").innerHTML="";
   document.querySelector(".saving").classList.remove("savingStyle");
@@ -116,6 +136,7 @@ const over=document.querySelector('.overlay');
   document.querySelector('.con1').innerHTML=''; 
   document.querySelector('.con1').classList.remove('style1');
   document.querySelector(".overlay").classList.remove("overlay1");
+  
   }
 
   let checkboxes=document.querySelectorAll(".tasks");
@@ -147,7 +168,7 @@ const over=document.querySelector('.overlay');
           showing.classList.remove("show");
         },2000);
 
-        if(data.innerHTML===""){
+        if(data.children.length===0){
           let prestyle=document.querySelector(".saving")
           prestyle.innerHTML=`<i class="fa-solid fa-book-open"></i>
           <h3 class="default">No Tasks Added</h3>`;
@@ -196,16 +217,16 @@ function App() {
             <div className="navh">
             <div><i class="fa-solid fa-house"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Home</button>
+            <button type="button" className="btn btn-outline-primary btn1">Home</button>
             </div>
             </div>
           </li>
 
           <li className="nav-item">
             <div className="navb">
-            <div><i className="fa-regular fa-bookmark"></i></div>
+            <div><i class="fa-regular fa-star" style={{color: "rgb(255, 255, 255)"}}></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Bookmark</button>
+            <button type="button" className="btn btn-outline-primary btn2">Starred</button>
             </div>
             </div>
           </li>
@@ -214,7 +235,7 @@ function App() {
             <div className="navb">
             <div><i className="fa-solid fa-plus"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Add Task</button>
+            <button type="button" className="btn btn-outline-primary btn3">Add Task</button>
             </div>
             </div>
           </li>
@@ -223,7 +244,7 @@ function App() {
             <div className="navb">
             <div><i className="fa-solid fa-recycle"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Trash</button>
+            <button type="button" className="btn btn-outline-primary btn4">Trash</button>
             </div>
             </div>
           </li>
@@ -232,7 +253,7 @@ function App() {
             <div className="navb">
             <div><i class="fa-solid fa-circle-info"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">About</button>
+            <button type="button" className="btn btn-outline-primary btn5">About</button>
             </div>
             </div>
           </li>
@@ -241,7 +262,7 @@ function App() {
             <div className="navb">
             <div><i className="fa-solid fa-list-check"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Todays's Task</button>
+            <button type="button" className="btn btn-outline-primary btn6">Todays's Task</button>
             </div>
             </div>
           </li>
@@ -250,7 +271,7 @@ function App() {
             <div className="navb">
             <div><i class="fa-solid fa-arrow-up-wide-short"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Sort</button>
+            <button type="button" className="btn btn-outline-primary btn7">Sort</button>
             </div>
             </div>
           </li>
@@ -259,7 +280,7 @@ function App() {
             <div className="navb">
             <div><i class="fa-solid fa-calendar-days"></i></div>
             <div>
-            <button type="button" className="btn btn-outline-primary">Remainders</button>
+            <button type="button" className="btn btn-outline-primary btn8">Remainders</button>
             </div>
             </div>
           </li>
@@ -273,7 +294,7 @@ function App() {
 
 {/**add **/}
      <div className="a1">
-      <i className="fa-solid fa-circle-plus" onClick={addchecks}></i>
+      <i className="fa-solid fa-circle-plus disl" onClick={addchecks}></i>
      </div>
 
   {/* {collection div} */}
@@ -294,6 +315,9 @@ function App() {
     <div className="text1">Task is finished</div>
     <div className="textbt"><button type="button" className="btn btn-link">Undo</button></div>
   </div>
+
+  {/* starbtn work */}
+  <div className="pop1"></div>
 </>
   );
 }
