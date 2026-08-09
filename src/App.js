@@ -600,7 +600,7 @@ function addStarEvents() {
 
         // IMPORTANT:
         // DO NOT switch to Starred automatically
-        showView(currentView);
+        // showView(currentView);
 
       } else {
 
@@ -615,7 +615,7 @@ function addStarEvents() {
 
         // IMPORTANT:
         // Stay on the current tab
-        showView(currentView);
+        // showView(currentView);
       }
 
     });
@@ -694,7 +694,7 @@ function addchecks() {
   let type = "";
 
   const data = document.querySelector(".todo");
-  const saveStar = document.querySelector(".pop1");
+  // const saveStar = document.querySelector(".pop1");
 
   const s = document.querySelector(".con1");
   const over = document.querySelector(".overlay");
