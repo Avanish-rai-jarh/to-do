@@ -114,7 +114,7 @@ const over=document.querySelector('.overlay');
   let h=document.querySelector(".btn1");
   let st=document.querySelector(".btn2");
   h.onclick=function(){
-      document.querySelector(".pop1").style. display="none";
+      document.querySelector(".pop1").style.display="none";
       document.querySelector(".todo").style.display="flex";
 
       document.querySelector(".disl").style.pointerEvents="auto";
