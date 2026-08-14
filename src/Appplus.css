@@ -1,39 +1,346 @@
-.feature{
-    margin-right:75px;
-    border-radius:5%;
-    color:lab(100% 0.01 -0.01);
-    background:transparent;
-    opacity:50%;
-    border:0px solid grey;
-    outline:none;
-    font-weight:600;
-    font-size:15px;
-    z-index:700;
-    cursor:auto !important;
+/* =====================================================
+   APPPLUS.CSS
+   ===================================================== */
+
+
+/* =====================================================
+   TASK TYPE
+   ===================================================== */
+
+.feature {
+    margin-right: 75px;
+
+    border-radius: 5%;
+
+    color: lab(100% 0.01 -0.01);
+
+    background: transparent;
+
+    opacity: 50%;
+
+    border: 0;
+
+    outline: none;
+
+    font-weight: 600;
+
+    font-size: 15px;
+
+    z-index: 700;
+
+    cursor: default !important;
 }
 
-.starStyle{
+
+/* =====================================================
+   STAR
+   ===================================================== */
+
+.starStyle {
     color: rgb(189, 150, 25) !important;
 }
 
-.todo{
+
+/* =====================================================
+   HOME
+   ===================================================== */
+
+.todo {
     width: 100%;
+
     min-height: 100vh;
+
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     padding-top: 80px;
+
     padding-bottom: 100px;
+
     box-sizing: border-box;
 }
 
-.pop1{
+
+/* =====================================================
+   STARRED
+   ===================================================== */
+
+.pop1 {
     display: none;
+
     flex-direction: column;
+
     align-items: center;
+
     width: 100%;
+
     min-height: 100vh;
+
     padding-top: 80px;
+
     padding-bottom: 100px;
+
     box-sizing: border-box;
+}
+
+
+/* =====================================================
+   TRASH BUTTONS
+   ===================================================== */
+
+.trashButtons {
+    width: 100%;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 15px;
+
+    box-sizing: border-box;
+}
+
+
+.restoreTask,
+.deleteTask {
+    cursor: pointer !important;
+}
+
+
+.restoreTask:hover,
+.deleteTask:hover {
+    transform: scale(1.05);
+
+    transition:
+        all 0.2s ease;
+}
+
+
+/* =====================================================
+   ABOUT
+   ===================================================== */
+
+.aboutBox {
+    text-align: center;
+
+    color: white;
+
+    padding: 30px;
+
+    max-width: 600px;
+}
+
+
+.aboutBox > i {
+    font-size: 50px;
+
+    color:
+        rgb(10, 141, 130);
+}
+
+
+.aboutBox h2 {
+    margin-top: 20px;
+}
+
+
+.aboutBox p {
+    color:
+        rgb(200, 190, 210);
+
+    line-height: 1.6;
+}
+
+
+/* =====================================================
+   EMPTY ICONS
+   ===================================================== */
+
+.savingStyle .fa-trash {
+    color:
+        rgb(180, 60, 60);
+
+    font-size: 35px;
+}
+
+
+.savingStyle .fa-list-check {
+    color:
+        rgb(10, 141, 130);
+
+    font-size: 35px;
+}
+
+
+.savingStyle .fa-calendar-days {
+    color:
+        rgb(10, 141, 130);
+
+    font-size: 35px;
+}
+
+
+/* =====================================================
+   REMINDER NOTIFICATION
+   ===================================================== */
+
+.taskNotification {
+    position: fixed;
+
+    right: 25px;
+    bottom: 25px;
+
+    width: 360px;
+
+    min-height: 75px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 15px;
+
+    background:
+        rgba(10, 1, 24, 0.97);
+
+    border:
+        2px solid rgb(10, 141, 130);
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.5);
+
+    color: white;
+
+    z-index: 2000;
+
+    transform:
+        translateX(450px);
+
+    opacity: 0;
+
+    transition:
+        transform 0.4s ease,
+        opacity 0.4s ease;
+
+    box-sizing: border-box;
+}
+
+
+.notificationShow {
+    transform:
+        translateX(0);
+
+    opacity: 1;
+}
+
+
+.notificationIcon {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 12px;
+
+    border-radius: 50%;
+
+    background:
+        rgb(10, 141, 130);
+}
+
+
+.notificationIcon i {
+    font-size: 20px;
+
+    color: white;
+}
+
+
+.notificationContent {
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    overflow: hidden;
+}
+
+
+.notificationContent strong {
+    font-size: 16px;
+
+    margin-bottom: 4px;
+}
+
+
+.notificationContent span {
+    font-size: 14px;
+
+    color:
+        rgb(210, 210, 210);
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.notificationClose {
+    border: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    margin-left: 10px;
+}
+
+
+.notificationClose:hover {
+    color:
+        rgb(10, 141, 130);
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .feature {
+        margin-right: 25px;
+    }
+
+
+    .trashButtons {
+        gap: 5px;
+    }
+
+
+    .taskNotification {
+        right: 10px;
+        left: 10px;
+
+        bottom: 15px;
+
+        width: auto;
+    }
 }
