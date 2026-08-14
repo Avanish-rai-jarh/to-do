@@ -1,25 +1,24 @@
-import React, { useEffect } from 'react';
-import './App.css';
-import './Appplus.css';
+import React, { useEffect } from "react";
+import "./App.css";
+import "./Appplus.css";
 
-let currentView = "home";
 let reminderTimer = null;
 let audioContext = null;
 
 
 // =====================================================
-// BASIC HELPERS
+// HELPERS
 // =====================================================
 
-function getTodo() {
+function todoBox() {
     return document.querySelector(".todo");
 }
 
-function getStarred() {
+function starBox() {
     return document.querySelector(".pop1");
 }
 
-function getSaving() {
+function savingBox() {
     return document.querySelector(".saving");
 }
 
@@ -32,20 +31,53 @@ function escapeHTML(value) {
         .replace(/'/g, "&#039;");
 }
 
+function closeForm() {
+    document.querySelector(".con1").innerHTML = "";
+    document.querySelector(".con1").classList.remove("style1");
+    document.querySelector(".overlay").classList.remove("overlay1");
+}
+
+function saveTasks() {
+    localStorage.setItem(
+        "todotasks",
+        todoBox().innerHTML
+    );
+
+    localStorage.setItem(
+        "startask",
+        starBox().innerHTML
+    );
+}
+
+function showEmpty(icon, text) {
+    const box = savingBox();
+
+    box.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <h3 class="default">${escapeHTML(text)}</h3>
+    `;
+
+    box.classList.add("savingStyle");
+}
+
+function hideEmpty() {
+    const box = savingBox();
+
+    box.innerHTML = "";
+    box.classList.remove("savingStyle");
+}
+
 
 // =====================================================
 // AUDIO
 // =====================================================
 
-function getAudioContext() {
-
+function audio() {
     const AudioContext =
         window.AudioContext ||
         window.webkitAudioContext;
 
-    if (!AudioContext) {
-        return null;
-    }
+    if (!AudioContext) return null;
 
     if (!audioContext) {
         audioContext = new AudioContext();
@@ -58,518 +90,139 @@ function getAudioContext() {
     return audioContext;
 }
 
-
-function makeTone(
+function tone(
     frequency,
-    startTime,
+    start,
     duration,
     volume = 0.1,
     type = "sine"
 ) {
+    const ctx = audio();
 
-    const ctx = getAudioContext();
+    if (!ctx) return;
 
-    if (!ctx) {
-        return;
-    }
-
-    const oscillator =
-        ctx.createOscillator();
-
-    const gain =
-        ctx.createGain();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     oscillator.type = type;
 
     oscillator.frequency.setValueAtTime(
         frequency,
-        startTime
+        start
     );
 
     gain.gain.setValueAtTime(
         0.001,
-        startTime
+        start
     );
 
     gain.gain.exponentialRampToValueAtTime(
         volume,
-        startTime + 0.02
+        start + 0.02
     );
 
     gain.gain.exponentialRampToValueAtTime(
         0.001,
-        startTime + duration
+        start + duration
     );
 
     oscillator.connect(gain);
+    gain.connect(ctx.destination);
 
-    gain.connect(
-        ctx.destination
-    );
-
-    oscillator.start(
-        startTime
-    );
-
-    oscillator.stop(
-        startTime + duration
-    );
+    oscillator.start(start);
+    oscillator.stop(start + duration);
 }
 
+function sound(type) {
+    const ctx = audio();
 
-function playSound(type) {
+    if (!ctx) return;
 
-    const ctx =
-        getAudioContext();
+    const n = ctx.currentTime;
 
-    if (!ctx) {
-        return;
+    if (type === "click") {
+        tone(700, n, 0.06, 0.05);
     }
 
-    const now =
-        ctx.currentTime;
-
-
-    if (type === "navigation") {
-
-        makeTone(
-            700,
-            now,
-            0.06,
-            0.05
-        );
+    if (type === "add") {
+        tone(650, n, 0.08, 0.09);
+        tone(900, n + 0.09, 0.10, 0.10);
     }
 
-
-    else if (type === "add") {
-
-        makeTone(
-            650,
-            now,
-            0.08,
-            0.09
-        );
-
-        makeTone(
-            900,
-            now + 0.09,
-            0.10,
-            0.10
-        );
+    if (type === "save") {
+        tone(600, n, 0.10, 0.09);
+        tone(800, n + 0.10, 0.10, 0.10);
+        tone(1000, n + 0.20, 0.14, 0.12);
     }
 
-
-    else if (type === "save") {
-
-        makeTone(
-            600,
-            now,
-            0.10,
-            0.09
-        );
-
-        makeTone(
-            800,
-            now + 0.10,
-            0.10,
-            0.10
-        );
-
-        makeTone(
-            1000,
-            now + 0.20,
-            0.14,
-            0.12
-        );
+    if (type === "star") {
+        tone(900, n, 0.08, 0.10);
+        tone(1200, n + 0.08, 0.12, 0.12);
     }
 
-
-    else if (type === "star") {
-
-        makeTone(
-            900,
-            now,
-            0.08,
-            0.10
-        );
-
-        makeTone(
-            1200,
-            now + 0.08,
-            0.12,
-            0.12
-        );
+    if (type === "unstar") {
+        tone(850, n, 0.08, 0.08);
+        tone(600, n + 0.08, 0.12, 0.08);
     }
 
-
-    else if (type === "unstar") {
-
-        makeTone(
-            850,
-            now,
-            0.08,
-            0.08
-        );
-
-        makeTone(
-            600,
-            now + 0.08,
-            0.12,
-            0.08
-        );
+    if (type === "edit") {
+        tone(700, n, 0.07, 0.08);
+        tone(850, n + 0.09, 0.07, 0.08);
     }
 
-
-    else if (type === "edit") {
-
-        makeTone(
-            700,
-            now,
-            0.07,
-            0.08
-        );
-
-        makeTone(
-            850,
-            now + 0.09,
-            0.07,
-            0.08
-        );
+    if (type === "update") {
+        tone(700, n, 0.08, 0.10);
+        tone(950, n + 0.10, 0.12, 0.12);
     }
 
-
-    else if (type === "update") {
-
-        makeTone(
-            700,
-            now,
-            0.08,
-            0.10
-        );
-
-        makeTone(
-            950,
-            now + 0.10,
-            0.12,
-            0.12
-        );
+    if (type === "complete") {
+        tone(1000, n, 0.10, 0.12);
+        tone(800, n + 0.10, 0.10, 0.10);
+        tone(600, n + 0.20, 0.14, 0.08);
     }
 
-
-    else if (type === "complete") {
-
-        makeTone(
-            1000,
-            now,
-            0.10,
-            0.12
-        );
-
-        makeTone(
-            800,
-            now + 0.10,
-            0.10,
-            0.10
-        );
-
-        makeTone(
-            600,
-            now + 0.20,
-            0.14,
-            0.08
-        );
+    if (type === "restore") {
+        tone(600, n, 0.10, 0.09);
+        tone(800, n + 0.10, 0.10, 0.10);
+        tone(1000, n + 0.20, 0.14, 0.12);
     }
 
-
-    else if (type === "restore") {
-
-        makeTone(
-            600,
-            now,
-            0.10,
-            0.09
-        );
-
-        makeTone(
-            800,
-            now + 0.10,
-            0.10,
-            0.10
-        );
-
-        makeTone(
-            1000,
-            now + 0.20,
-            0.14,
-            0.12
-        );
+    if (type === "delete") {
+        tone(500, n, 0.12, 0.10, "triangle");
+        tone(300, n + 0.13, 0.18, 0.08, "triangle");
     }
 
-
-    else if (type === "delete") {
-
-        makeTone(
-            500,
-            now,
-            0.12,
-            0.10,
-            "triangle"
-        );
-
-        makeTone(
-            300,
-            now + 0.13,
-            0.18,
-            0.08,
-            "triangle"
-        );
+    if (type === "cancel") {
+        tone(450, n, 0.08, 0.06);
     }
 
-
-    else if (type === "cancel") {
-
-        makeTone(
-            450,
-            now,
-            0.08,
-            0.06
-        );
-    }
-
-
-    else if (type === "reminder") {
-
-        makeTone(
-            880,
-            now,
-            0.18,
-            0.18
-        );
-
-        makeTone(
-            660,
-            now + 0.22,
-            0.18,
-            0.16
-        );
-
-        makeTone(
-            880,
-            now + 0.44,
-            0.18,
-            0.18
-        );
-
-        makeTone(
-            660,
-            now + 0.66,
-            0.18,
-            0.16
-        );
-
-        makeTone(
-            880,
-            now + 0.88,
-            0.25,
-            0.20
-        );
+    if (type === "reminder") {
+        tone(880, n, 0.18, 0.18);
+        tone(660, n + 0.22, 0.18, 0.16);
+        tone(880, n + 0.44, 0.18, 0.18);
+        tone(660, n + 0.66, 0.18, 0.16);
+        tone(880, n + 0.88, 0.25, 0.20);
     }
 }
 
 
 // =====================================================
-// CLOSE FORM
+// NOTIFICATION
 // =====================================================
 
-function closeForm() {
-
-    document.querySelector(".con1").innerHTML = "";
-
-    document.querySelector(".con1")
-        .classList.remove("style1");
-
-    document.querySelector(".overlay")
-        .classList.remove("overlay1");
-}
-
-
-// =====================================================
-// SAVE
-// =====================================================
-
-function savetask() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    localStorage.setItem(
-        "todotasks",
-        todo.innerHTML
-    );
-
-    localStorage.setItem(
-        "startask",
-        starred.innerHTML
-    );
-}
-
-
-// =====================================================
-// EMPTY MESSAGE
-// =====================================================
-
-function showEmptyMessage(
-    icon,
-    message
-) {
-
-    const saving =
-        getSaving();
-
-    saving.innerHTML = `
-        <i class="fa-solid ${icon}"></i>
-        <h3 class="default">
-            ${escapeHTML(message)}
-        </h3>
-    `;
-
-    saving.classList.add(
-        "savingStyle"
-    );
-}
-
-
-function hideEmptyMessage() {
-
-    const saving =
-        getSaving();
-
-    saving.innerHTML = "";
-
-    saving.classList.remove(
-        "savingStyle"
-    );
-}
-
-
-// =====================================================
-// IN-APP NOTIFICATION
-// =====================================================
-
-function showNotification(
-    title,
-    message
-) {
-
-    let box =
-        document.querySelector(
-            ".taskNotification"
-        );
-
-    if (!box) {
-
-        box =
-            document.createElement(
-                "div"
-            );
-
-        box.className =
-            "taskNotification";
-
-        document.body.appendChild(
-            box
-        );
-    }
-
-    box.innerHTML = `
-
-        <div class="notificationIcon">
-            <i class="fa-solid fa-bell"></i>
-        </div>
-
-        <div class="notificationContent">
-
-            <strong>
-                ${escapeHTML(title)}
-            </strong>
-
-            <span>
-                ${escapeHTML(message)}
-            </span>
-
-        </div>
-
-        <button
-            class="notificationClose"
-            type="button"
-        >
-            ×
-        </button>
-    `;
-
-    box.classList.add(
-        "notificationShow"
-    );
-
-    box.querySelector(
-        ".notificationClose"
-    ).onclick = function () {
-
-        box.classList.remove(
-            "notificationShow"
-        );
-    };
-
-    setTimeout(() => {
-
-        box.classList.remove(
-            "notificationShow"
-        );
-
-    }, 8000);
-}
-
-
-// =====================================================
-// BROWSER NOTIFICATION
-// =====================================================
-
-function requestNotificationPermission() {
-
+function askNotification() {
     if (
-        !("Notification" in window)
+        "Notification" in window &&
+        Notification.permission === "default"
     ) {
-        return;
-    }
-
-    if (
-        Notification.permission ===
-        "default"
-    ) {
-
         Notification.requestPermission();
     }
 }
 
-
-function sendBrowserNotification(
-    taskText,
-    date,
-    time
-) {
-
+function browserNotification(text, date, time) {
     if (
-        !("Notification" in window)
-    ) {
-        return;
-    }
-
-    if (
-        Notification.permission !==
-        "granted"
+        !("Notification" in window) ||
+        Notification.permission !== "granted"
     ) {
         return;
     }
@@ -577,22 +230,77 @@ function sendBrowserNotification(
     new Notification(
         "Regular Task Reminder",
         {
-            body:
-                `${taskText}\nReminder: ${date} ${time}`,
-
-            icon:
-                `${window.location.origin}/ico.png`
+            body: `${text}\n${date} ${time}`,
+            icon: `${window.location.origin}/ico.png`
         }
     );
 }
 
+function notify(title, message) {
+    let box =
+        document.querySelector(".taskNotification");
+
+    if (!box) {
+        box = document.createElement("div");
+        box.className = "taskNotification";
+        document.body.appendChild(box);
+    }
+
+    box.innerHTML = `
+        <div class="notificationIcon">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+
+        <div class="notificationContent">
+            <strong>${escapeHTML(title)}</strong>
+            <span>${escapeHTML(message)}</span>
+        </div>
+
+        <button
+            type="button"
+            class="notificationClose"
+        >
+            ×
+        </button>
+    `;
+
+    box.classList.add("notificationShow");
+
+    box.querySelector(
+        ".notificationClose"
+    ).onclick = () => {
+        box.classList.remove("notificationShow");
+    };
+
+    clearTimeout(box.timer);
+
+    box.timer = setTimeout(() => {
+        box.classList.remove("notificationShow");
+    }, 8000);
+}
+
 
 // =====================================================
-// REMINDER ID
+// TASK DATE
 // =====================================================
 
-function getReminderId(task) {
+function taskDate(task) {
+    const date =
+        task.querySelector(".l3")
+            ?.innerText
+            .replace("Date:", "")
+            .trim() || "";
 
+    const time =
+        task.querySelector(".l4")
+            ?.innerText
+            .replace("Time:", "")
+            .trim() || "";
+
+    return new Date(`${date}T${time}`);
+}
+
+function reminderId(task) {
     const text =
         task.querySelector(".l1")
             ?.innerText || "";
@@ -600,22 +308,1211 @@ function getReminderId(task) {
     const date =
         task.querySelector(".l3")
             ?.innerText
-            .replace(
-                "Date:",
-                ""
-            )
+            .replace("Date:", "")
             .trim() || "";
 
     const time =
         task.querySelector(".l4")
             ?.innerText
-            .replace(
-                "Time:",
-                ""
-            )
+            .replace("Time:", "")
             .trim() || "";
 
     return `${text}|${date}|${time}`;
+}
+
+function taskDay(date) {
+    const days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    ];
+
+    return days[
+        new Date(`${date}T00:00:00`).getDay()
+    ];
+}
+
+
+// =====================================================
+// ADD TASK
+// =====================================================
+
+function addTask() {
+    askNotification();
+
+    const form =
+        document.querySelector(".con1");
+
+    document.querySelector(".overlay")
+        .classList.add("overlay1");
+
+    form.classList.add("style1");
+
+    form.innerHTML = `
+        <form class="form1">
+
+            <div class="ip1">
+                <a>What is your task?</a>
+
+                <textarea
+                    class="ip20"
+                    placeholder="Enter task here"
+                ></textarea>
+            </div>
+
+            <div class="ip1">
+                <a>Pick remainder date and time</a>
+
+                <input
+                    type="datetime-local"
+                    class="ip21"
+                />
+            </div>
+
+            <div class="ip1">
+                <a>Enter task type</a>
+
+                <input
+                    type="text"
+                    class="ip22"
+                    placeholder="Enter here"
+                />
+            </div>
+
+            <div class="buttons">
+
+                <button
+                    type="button"
+                    class="btn btn-danger cancelTask"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary saveTask"
+                >
+                    Save Task
+                </button>
+
+            </div>
+
+        </form>
+    `;
+
+    form.querySelector(
+        ".cancelTask"
+    ).onclick = () => {
+        sound("cancel");
+        closeForm();
+    };
+
+    form.querySelector(
+        ".saveTask"
+    ).onclick = () => {
+
+        const text =
+            form.querySelector(".ip20")
+                .value.trim();
+
+        const datetime =
+            form.querySelector(".ip21")
+                .value;
+
+        const type =
+            form.querySelector(".ip22")
+                .value.trim();
+
+        if (!text || !datetime || !type) {
+            alert("Please fill all the fields.");
+            return;
+        }
+
+        const parts = datetime.split("T");
+
+        const date = parts[0];
+        const time = parts[1];
+
+        todoBox().insertAdjacentHTML(
+            "beforeend",
+            `
+            <div class="form-check">
+
+                <input
+                    class="form-check-input tasks"
+                    type="checkbox"
+                >
+
+                <div class="taskContent">
+
+                    <label
+                        class="form-check-label l1 colaps"
+                    >
+                        ${escapeHTML(text)}
+                    </label>
+
+                    <hr>
+
+                    <label class="form-check-label l2">
+                        Day:${taskDay(date)}
+                    </label>
+
+                    <br>
+
+                    <label class="form-check-label l3">
+                        Date:${date}
+                    </label>
+
+                    <br>
+
+                    <label class="form-check-label l4">
+                        Time:${time}
+                    </label>
+
+                    <div class="extra">
+
+                        <button
+                            type="button"
+                            class="feature"
+                        >
+                            ${escapeHTML(type)}
+                        </button>
+
+                        <div class="extra1">
+                            <i class="fa-regular fa-star"></i>
+                        </div>
+
+                        <div class="extra2">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            `
+        );
+
+        saveTasks();
+
+        closeForm();
+        hideEmpty();
+
+        sound("save");
+
+        bindTasks();
+
+        notify(
+            "Task Added",
+            "Your task has been saved."
+        );
+    };
+}
+
+
+// =====================================================
+// EDIT TASK
+// =====================================================
+
+function editTask(task) {
+    sound("edit");
+
+    const form =
+        document.querySelector(".con1");
+
+    document.querySelector(".overlay")
+        .classList.add("overlay1");
+
+    form.classList.add("style1");
+
+    const oldText =
+        task.querySelector(".l1")
+            ?.innerText || "";
+
+    const oldDate =
+        task.querySelector(".l3")
+            ?.innerText
+            .replace("Date:", "")
+            .trim() || "";
+
+    const oldTime =
+        task.querySelector(".l4")
+            ?.innerText
+            .replace("Time:", "")
+            .trim() || "";
+
+    const oldType =
+        task.querySelector(".feature")
+            ?.innerText || "";
+
+    const oldReminder =
+        reminderId(task);
+
+    form.innerHTML = `
+        <form class="form1">
+
+            <div class="ip1">
+                <a>What is your task?</a>
+
+                <textarea class="ip20">${escapeHTML(
+                    oldText
+                )}</textarea>
+            </div>
+
+            <div class="ip1">
+                <a>Pick remainder date and time</a>
+
+                <input
+                    type="datetime-local"
+                    class="ip21"
+                    value="${oldDate}T${oldTime}"
+                />
+            </div>
+
+            <div class="ip1">
+                <a>Enter task type</a>
+
+                <input
+                    type="text"
+                    class="ip22"
+                    value="${escapeHTML(oldType)}"
+                />
+            </div>
+
+            <div class="buttons">
+
+                <button
+                    type="button"
+                    class="btn btn-danger cancelEdit"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary updateEdit"
+                >
+                    Update Task
+                </button>
+
+            </div>
+
+        </form>
+    `;
+
+    form.querySelector(
+        ".cancelEdit"
+    ).onclick = () => {
+        sound("cancel");
+        closeForm();
+    };
+
+    form.querySelector(
+        ".updateEdit"
+    ).onclick = () => {
+
+        const text =
+            form.querySelector(".ip20")
+                .value.trim();
+
+        const datetime =
+            form.querySelector(".ip21")
+                .value;
+
+        const type =
+            form.querySelector(".ip22")
+                .value.trim();
+
+        if (!text || !datetime || !type) {
+            alert("Please fill all the fields.");
+            return;
+        }
+
+        const parts = datetime.split("T");
+
+        const date = parts[0];
+        const time = parts[1];
+
+        task.querySelector(".l1").innerText =
+            text;
+
+        task.querySelector(".l2").innerText =
+            `Day:${taskDay(date)}`;
+
+        task.querySelector(".l3").innerText =
+            `Date:${date}`;
+
+        task.querySelector(".l4").innerText =
+            `Time:${time}`;
+
+        task.querySelector(".feature").innerText =
+            type;
+
+        let notified =
+            JSON.parse(
+                localStorage.getItem(
+                    "notifiedReminders"
+                ) || "[]"
+            );
+
+        notified = notified.filter(
+            id => id !== oldReminder
+        );
+
+        localStorage.setItem(
+            "notifiedReminders",
+            JSON.stringify(notified)
+        );
+
+        saveTasks();
+
+        closeForm();
+
+        sound("update");
+
+        bindTasks();
+
+        notify(
+            "Task Updated",
+            "Your task was updated successfully."
+        );
+    };
+}
+
+
+// =====================================================
+// STAR
+// =====================================================
+
+function bindStars() {
+    document.querySelectorAll(
+        ".fa-star"
+    ).forEach(star => {
+
+        if (star.dataset.bound === "true") {
+            return;
+        }
+
+        star.dataset.bound = "true";
+
+        star.onclick = event => {
+            event.stopPropagation();
+
+            const task =
+                star.closest(".form-check");
+
+            if (!task) return;
+
+            if (
+                star.classList.contains(
+                    "starStyle"
+                )
+            ) {
+                sound("unstar");
+
+                star.classList.remove(
+                    "fa-solid",
+                    "starStyle"
+                );
+
+                star.classList.add(
+                    "fa-regular"
+                );
+
+                todoBox().appendChild(task);
+
+            } else {
+                sound("star");
+
+                star.classList.remove(
+                    "fa-regular"
+                );
+
+                star.classList.add(
+                    "fa-solid",
+                    "starStyle"
+                );
+
+                starBox().appendChild(task);
+            }
+
+            saveTasks();
+            bindTasks();
+        };
+    });
+}
+
+
+// =====================================================
+// COMPLETE TASK
+// =====================================================
+
+function completeTask(task) {
+    if (!task) return;
+
+    sound("complete");
+
+    const container =
+        document.createElement("div");
+
+    container.innerHTML =
+        localStorage.getItem(
+            "trashtasks"
+        ) || "";
+
+    const copy =
+        task.cloneNode(true);
+
+    const checkbox =
+        copy.querySelector(".tasks");
+
+    if (checkbox) {
+        checkbox.checked = true;
+        checkbox.disabled = true;
+    }
+
+    copy.querySelectorAll(
+        "[data-bound]"
+    ).forEach(element => {
+        delete element.dataset.bound;
+    });
+
+    container.appendChild(copy);
+
+    localStorage.setItem(
+        "trashtasks",
+        container.innerHTML
+    );
+
+    task.remove();
+
+    saveTasks();
+
+    const message =
+        document.querySelector(".Message1");
+
+    message.classList.add("show");
+
+    const undo =
+        message.querySelector(".btn-link");
+
+    clearTimeout(message.undoTimer);
+
+    undo.onclick = () => {
+
+        const trash =
+            document.createElement("div");
+
+        trash.innerHTML =
+            localStorage.getItem(
+                "trashtasks"
+            ) || "";
+
+        const text =
+            task.querySelector(".l1")
+                ?.innerText || "";
+
+        trash.querySelectorAll(
+            ".form-check"
+        ).forEach(item => {
+
+            if (
+                item.querySelector(".l1")
+                    ?.innerText === text
+            ) {
+                item.remove();
+            }
+        });
+
+        localStorage.setItem(
+            "trashtasks",
+            trash.innerHTML
+        );
+
+        const box =
+            task.querySelector(".tasks");
+
+        if (box) {
+            box.checked = false;
+            box.disabled = false;
+        }
+
+        task.querySelectorAll(
+            "[data-bound]"
+        ).forEach(element => {
+            delete element.dataset.bound;
+        });
+
+        todoBox().appendChild(task);
+
+        saveTasks();
+
+        bindTasks();
+
+        message.classList.remove("show");
+
+        hideEmpty();
+    };
+
+    message.undoTimer =
+        setTimeout(() => {
+            message.classList.remove("show");
+        }, 5000);
+
+    if (
+        todoBox().children.length === 0 &&
+        starBox().children.length === 0
+    ) {
+        showEmpty(
+            "fa-book-open",
+            "No Tasks Added"
+        );
+    }
+}
+
+
+// =====================================================
+// CHECKBOX
+// =====================================================
+
+function bindCheckboxes() {
+    document.querySelectorAll(
+        ".tasks"
+    ).forEach(box => {
+
+        if (box.dataset.bound === "true") {
+            return;
+        }
+
+        box.dataset.bound = "true";
+
+        box.onchange = event => {
+
+            if (!event.target.checked) {
+                return;
+            }
+
+            completeTask(
+                event.target.closest(
+                    ".form-check"
+                )
+            );
+        };
+    });
+}
+
+
+// =====================================================
+// EDIT ICON
+// =====================================================
+
+function bindEdit() {
+    document.querySelectorAll(
+        ".fa-pen-to-square"
+    ).forEach(icon => {
+
+        if (icon.dataset.bound === "true") {
+            return;
+        }
+
+        icon.dataset.bound = "true";
+
+        icon.onclick = event => {
+            event.stopPropagation();
+
+            const task =
+                icon.closest(".form-check");
+
+            if (task) {
+                editTask(task);
+            }
+        };
+    });
+}
+
+function bindTasks() {
+    bindStars();
+    bindCheckboxes();
+    bindEdit();
+}
+
+
+// =====================================================
+// HOME
+// =====================================================
+
+function home() {
+    todoBox().style.display = "flex";
+    starBox().style.display = "none";
+
+    todoBox().querySelectorAll(
+        ".form-check"
+    ).forEach(task => {
+        task.style.display = "block";
+    });
+
+    hideEmpty();
+
+    if (
+        todoBox().children.length === 0
+    ) {
+        showEmpty(
+            "fa-book-open",
+            "No Tasks Added"
+        );
+    }
+
+    bindTasks();
+}
+
+
+// =====================================================
+// STARRED
+// =====================================================
+
+function starred() {
+    todoBox().style.display = "none";
+    starBox().style.display = "flex";
+
+    hideEmpty();
+
+    if (
+        starBox().children.length === 0
+    ) {
+        showEmpty(
+            "fa-star",
+            "No Starred Tasks"
+        );
+    }
+
+    bindTasks();
+}
+
+
+// =====================================================
+// TODAY
+// =====================================================
+
+function todayTasks() {
+    todoBox().style.display = "flex";
+    starBox().style.display = "none";
+
+    const now = new Date();
+
+    const today =
+        `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+        ).padStart(2, "0")}-${String(
+            now.getDate()
+        ).padStart(2, "0")}`;
+
+    let found = false;
+
+    todoBox().querySelectorAll(
+        ".form-check"
+    ).forEach(task => {
+
+        const date =
+            task.querySelector(".l3")
+                ?.innerText
+                .replace("Date:", "")
+                .trim();
+
+        if (date === today) {
+            task.style.display = "block";
+            found = true;
+        } else {
+            task.style.display = "none";
+        }
+    });
+
+    if (found) {
+        hideEmpty();
+    } else {
+        showEmpty(
+            "fa-list-check",
+            "No Today's Tasks"
+        );
+    }
+
+    bindTasks();
+}
+
+
+// =====================================================
+// REMINDERS VIEW
+// =====================================================
+
+function reminders() {
+    todoBox().style.display = "flex";
+    starBox().style.display = "none";
+
+    const now = new Date();
+    let found = false;
+
+    todoBox().querySelectorAll(
+        ".form-check"
+    ).forEach(task => {
+
+        const date =
+            taskDate(task);
+
+        if (
+            !Number.isNaN(date.getTime()) &&
+            date >= now
+        ) {
+            task.style.display = "block";
+            found = true;
+        } else {
+            task.style.display = "none";
+        }
+    });
+
+    if (found) {
+        hideEmpty();
+    } else {
+        showEmpty(
+            "fa-calendar-days",
+            "No Upcoming Reminders"
+        );
+    }
+
+    bindTasks();
+}
+
+
+// =====================================================
+// SORT
+// =====================================================
+
+function sortTasks() {
+    todoBox().style.display = "flex";
+    starBox().style.display = "none";
+
+    const tasks =
+        Array.from(
+            todoBox().querySelectorAll(
+                ".form-check"
+            )
+        );
+
+    tasks.sort(
+        (a, b) =>
+            taskDate(a) - taskDate(b)
+    );
+
+    tasks.forEach(task => {
+        task.style.display = "block";
+        todoBox().appendChild(task);
+    });
+
+    saveTasks();
+
+    if (tasks.length) {
+        hideEmpty();
+    } else {
+        showEmpty(
+            "fa-book-open",
+            "No Tasks Added"
+        );
+    }
+
+    bindTasks();
+}
+
+
+// =====================================================
+// ABOUT
+// =====================================================
+
+function about() {
+    todoBox().style.display = "none";
+    starBox().style.display = "none";
+
+    savingBox().innerHTML = `
+        <div class="aboutBox">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            <h2>Regular Task</h2>
+
+            <p>
+                A simple task management application.
+            </p>
+
+            <p>
+                Add tasks, set reminders,
+                star important tasks,
+                edit tasks and manage completed tasks.
+            </p>
+
+            <p>
+                Your tasks are stored locally
+                in your browser.
+            </p>
+
+        </div>
+    `;
+
+    savingBox().classList.add("savingStyle");
+}
+
+
+// =====================================================
+// TRASH
+// =====================================================
+
+function prepareTrash() {
+    const old =
+        localStorage.getItem(
+            "trashtasks"
+        );
+
+    if (!old) return;
+
+    const container =
+        document.createElement("div");
+
+    container.innerHTML = old;
+
+    container.querySelectorAll(
+        ".form-check"
+    ).forEach(task => {
+
+        if (
+            task.querySelector(
+                ".trashButtons"
+            )
+        ) {
+            return;
+        }
+
+        task.insertAdjacentHTML(
+            "beforeend",
+            `
+            <div class="trashButtons">
+
+                <button
+                    type="button"
+                    class="restoreTask btn btn-success btn-sm"
+                >
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Restore
+                </button>
+
+                <button
+                    type="button"
+                    class="deleteTask btn btn-danger btn-sm"
+                >
+                    <i class="fa-solid fa-trash"></i>
+                    Delete
+                </button>
+
+            </div>
+            `
+        );
+    });
+
+    localStorage.setItem(
+        "trashtasks",
+        container.innerHTML
+    );
+}
+
+function trash() {
+    todoBox().style.display = "flex";
+    starBox().style.display = "none";
+
+    const old =
+        localStorage.getItem(
+            "trashtasks"
+        );
+
+    todoBox().innerHTML = "";
+
+    if (!old) {
+        showEmpty(
+            "fa-trash",
+            "Trash is Empty"
+        );
+        return;
+    }
+
+    todoBox().innerHTML = old;
+
+    prepareTrash();
+
+    bindTrash();
+
+    hideEmpty();
+}
+
+function bindTrash() {
+
+    document.querySelectorAll(
+        ".restoreTask"
+    ).forEach(button => {
+
+        if (button.dataset.bound === "true") {
+            return;
+        }
+
+        button.dataset.bound = "true";
+
+        button.onclick = () => {
+
+            const task =
+                button.closest(
+                    ".form-check"
+                );
+
+            if (!task) return;
+
+            sound("restore");
+
+            const text =
+                task.querySelector(".l1")
+                    ?.innerText || "";
+
+            const container =
+                document.createElement("div");
+
+            container.innerHTML =
+                localStorage.getItem(
+                    "trashtasks"
+                ) || "";
+
+            container.querySelectorAll(
+                ".form-check"
+            ).forEach(item => {
+
+                if (
+                    item.querySelector(".l1")
+                        ?.innerText === text
+                ) {
+                    item.remove();
+                }
+            });
+
+            localStorage.setItem(
+                "trashtasks",
+                container.innerHTML
+            );
+
+            const checkbox =
+                task.querySelector(".tasks");
+
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.disabled = false;
+            }
+
+            task.querySelector(
+                ".trashButtons"
+            )?.remove();
+
+            task.querySelectorAll(
+                "[data-bound]"
+            ).forEach(element => {
+                delete element.dataset.bound;
+            });
+
+            todoBox().appendChild(task);
+
+            saveTasks();
+
+            bindTasks();
+
+            notify(
+                "Task Restored",
+                "The task has been restored."
+            );
+
+            if (
+                todoBox().children.length === 0
+            ) {
+                showEmpty(
+                    "fa-trash",
+                    "Trash is Empty"
+                );
+            }
+        };
+    });
+
+
+    document.querySelectorAll(
+        ".deleteTask"
+    ).forEach(button => {
+
+        if (button.dataset.bound === "true") {
+            return;
+        }
+
+        button.dataset.bound = "true";
+
+        button.onclick = () => {
+
+            const task =
+                button.closest(
+                    ".form-check"
+                );
+
+            if (!task) return;
+
+            sound("delete");
+
+            task.remove();
+
+            localStorage.setItem(
+                "trashtasks",
+                todoBox().innerHTML
+            );
+
+            notify(
+                "Task Deleted",
+                "The task was permanently deleted."
+            );
+
+            if (
+                todoBox().children.length === 0
+            ) {
+                showEmpty(
+                    "fa-trash",
+                    "Trash is Empty"
+                );
+            }
+        };
+    });
+}
+
+
+// =====================================================
+// LOAD TASKS
+// =====================================================
+
+function loadTasks() {
+
+    const saved =
+        localStorage.getItem(
+            "todotasks"
+        );
+
+    const savedStar =
+        localStorage.getItem(
+            "startask"
+        );
+
+    todoBox().innerHTML =
+        saved || "";
+
+    starBox().innerHTML =
+        savedStar || "";
+
+    bindTasks();
+
+    if (
+        todoBox().children.length === 0 &&
+        starBox().children.length === 0
+    ) {
+        todoBox().style.display = "none";
+
+        showEmpty(
+            "fa-book-open",
+            "No Tasks Added"
+        );
+    } else {
+        hideEmpty();
+    }
+}
+
+
+// =====================================================
+// NAVIGATION EVENTS
+// =====================================================
+
+function navigation() {
+
+    const plus =
+        document.querySelector(".disl");
+
+    document.querySelector(".btn1").onclick =
+        () => {
+            sound("click");
+            home();
+
+            plus.style.pointerEvents = "auto";
+            plus.style.opacity = "1";
+        };
+
+    document.querySelector(".btn2").onclick =
+        () => {
+            sound("click");
+            starred();
+
+            plus.style.pointerEvents = "none";
+            plus.style.opacity = "0.5";
+        };
+
+    document.querySelector(".btn3").onclick =
+        () => {
+            sound("add");
+            addTask();
+        };
+
+    document.querySelector(".btn4").onclick =
+        () => {
+            sound("click");
+            trash();
+
+            plus.style.pointerEvents = "none";
+            plus.style.opacity = "0.5";
+        };
+
+    document.querySelector(".btn5").onclick =
+        () => {
+            sound("click");
+            about();
+
+            plus.style.pointerEvents = "none";
+            plus.style.opacity = "0.5";
+        };
+
+    document.querySelector(".btn6").onclick =
+        () => {
+            sound("click");
+            todayTasks();
+
+            plus.style.pointerEvents = "none";
+            plus.style.opacity = "0.5";
+        };
+
+    document.querySelector(".btn7").onclick =
+        () => {
+            sound("click");
+            sortTasks();
+
+            plus.style.pointerEvents = "auto";
+            plus.style.opacity = "1";
+        };
+
+    document.querySelector(".btn8").onclick =
+        () => {
+            sound("click");
+            reminders();
+
+            plus.style.pointerEvents = "none";
+            plus.style.opacity = "0.5";
+        };
+
+    plus.onclick = () => {
+        sound("add");
+        addTask();
+    };
 }
 
 
@@ -625,8 +1522,7 @@ function getReminderId(task) {
 
 function checkReminders() {
 
-    const now =
-        new Date();
+    const now = new Date();
 
     const tasks =
         document.querySelectorAll(
@@ -642,2083 +1538,61 @@ function checkReminders() {
 
     tasks.forEach(task => {
 
-        const dateElement =
-            task.querySelector(".l3");
-
-        const timeElement =
-            task.querySelector(".l4");
-
-        if (
-            !dateElement ||
-            !timeElement
-        ) {
-            return;
-        }
-
         const date =
-            dateElement.innerText
-                .replace(
-                    "Date:",
-                    ""
-                )
-                .trim();
-
-        const time =
-            timeElement.innerText
-                .replace(
-                    "Time:",
-                    ""
-                )
-                .trim();
-
-        const taskText =
-            task.querySelector(".l1")
-                ?.innerText ||
-            "Task";
-
-        const reminderTime =
-            new Date(
-                `${date}T${time}`
-            );
+            taskDate(task);
 
         if (
             Number.isNaN(
-                reminderTime.getTime()
+                date.getTime()
             )
         ) {
             return;
         }
 
-        const reminderId =
-            getReminderId(task);
+        const id =
+            reminderId(task);
 
         if (
-            now.getTime() >=
-            reminderTime.getTime()
-            &&
-            !notified.includes(
-                reminderId
-            )
+            now >= date &&
+            !notified.includes(id)
         ) {
 
-            notified.push(
-                reminderId
-            );
+            notified.push(id);
 
             localStorage.setItem(
                 "notifiedReminders",
-                JSON.stringify(
-                    notified
-                )
+                JSON.stringify(notified)
             );
 
-            playSound(
-                "reminder"
-            );
+            const text =
+                task.querySelector(".l1")
+                    ?.innerText || "Task";
 
-            showNotification(
+            const dateText =
+                task.querySelector(".l3")
+                    ?.innerText
+                    .replace("Date:", "")
+                    .trim() || "";
+
+            const timeText =
+                task.querySelector(".l4")
+                    ?.innerText
+                    .replace("Time:", "")
+                    .trim() || "";
+
+            sound("reminder");
+
+            notify(
                 "Task Reminder",
-                `${taskText} — ${time}`
+                `${text} — ${timeText}`
             );
 
-            sendBrowserNotification(
-                taskText,
-                date,
-                time
+            browserNotification(
+                text,
+                dateText,
+                timeText
             );
         }
-    });
-}
-
-
-function startReminderChecker() {
-
-    if (reminderTimer) {
-
-        clearInterval(
-            reminderTimer
-        );
-    }
-
-    checkReminders();
-
-    reminderTimer =
-        setInterval(
-            checkReminders,
-            1000
-        );
-}
-
-
-// =====================================================
-// NAVIGATION
-// =====================================================
-
-function addNavigationEvents() {
-
-    const home =
-        document.querySelector(".btn1");
-
-    const starred =
-        document.querySelector(".btn2");
-
-    const add =
-        document.querySelector(".btn3");
-
-    const trash =
-        document.querySelector(".btn4");
-
-    const about =
-        document.querySelector(".btn5");
-
-    const today =
-        document.querySelector(".btn6");
-
-    const sort =
-        document.querySelector(".btn7");
-
-    const reminders =
-        document.querySelector(".btn8");
-
-    const plus =
-        document.querySelector(".disl");
-
-
-    home.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        showHome();
-
-        plus.style.pointerEvents =
-            "auto";
-
-        plus.style.opacity =
-            "1";
-    };
-
-
-    starred.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        showStarred();
-
-        plus.style.pointerEvents =
-            "none";
-
-        plus.style.opacity =
-            "0.5";
-    };
-
-
-    add.onclick = function () {
-
-        playSound(
-            "add"
-        );
-
-        requestNotificationPermission();
-
-        addchecks();
-    };
-
-
-    trash.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        showTrash();
-
-        plus.style.pointerEvents =
-            "none";
-
-        plus.style.opacity =
-            "0.5";
-    };
-
-
-    about.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        showAbout();
-
-        plus.style.pointerEvents =
-            "none";
-
-        plus.style.opacity =
-            "0.5";
-    };
-
-
-    today.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        showToday();
-
-        plus.style.pointerEvents =
-            "none";
-
-        plus.style.opacity =
-            "0.5";
-    };
-
-
-    sort.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        sortTasks();
-
-        plus.style.pointerEvents =
-            "auto";
-
-        plus.style.opacity =
-            "1";
-    };
-
-
-    reminders.onclick = function () {
-
-        playSound(
-            "navigation"
-        );
-
-        showReminders();
-
-        plus.style.pointerEvents =
-            "none";
-
-        plus.style.opacity =
-            "0.5";
-    };
-}
-
-
-// =====================================================
-// HOME
-// =====================================================
-
-function showHome() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    currentView =
-        "home";
-
-    todo.style.display =
-        "flex";
-
-    starred.style.display =
-        "none";
-
-    todo.querySelectorAll(
-        ".form-check"
-    ).forEach(task => {
-
-        task.style.display =
-            "block";
-    });
-
-    hideEmptyMessage();
-
-    if (
-        todo.children.length ===
-        0
-    ) {
-
-        showEmptyMessage(
-            "fa-book-open",
-            "No Tasks Added"
-        );
-    }
-
-    addStarEvents();
-    addCheckBoxEvent();
-    addEditEvents();
-}
-
-
-// =====================================================
-// STARRED
-// =====================================================
-
-function showStarred() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    currentView =
-        "starred";
-
-    todo.style.display =
-        "none";
-
-    starred.style.display =
-        "flex";
-
-    hideEmptyMessage();
-
-    if (
-        starred.children.length ===
-        0
-    ) {
-
-        showEmptyMessage(
-            "fa-star",
-            "No Starred Tasks"
-        );
-    }
-
-    addStarEvents();
-    addCheckBoxEvent();
-    addEditEvents();
-}
-
-
-// =====================================================
-// TRASH
-// =====================================================
-
-function showTrash() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    todo.style.display =
-        "flex";
-
-    starred.style.display =
-        "none";
-
-    currentView =
-        "trash";
-
-    const trash =
-        localStorage.getItem(
-            "trashtasks"
-        );
-
-    todo.innerHTML =
-        "";
-
-    if (!trash) {
-
-        showEmptyMessage(
-            "fa-trash",
-            "Trash is Empty"
-        );
-
-        return;
-    }
-
-    todo.innerHTML =
-        trash;
-
-    hideEmptyMessage();
-
-    prepareTrashTasks();
-
-    addTrashEvents();
-}
-
-
-// =====================================================
-// ABOUT
-// =====================================================
-
-function showAbout() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    const saving =
-        getSaving();
-
-    todo.style.display =
-        "none";
-
-    starred.style.display =
-        "none";
-
-    currentView =
-        "about";
-
-    saving.innerHTML = `
-
-        <div class="aboutBox">
-
-            <i
-                class="fa-solid fa-circle-info"
-            ></i>
-
-            <h2>
-                Regular Task
-            </h2>
-
-            <p>
-                A simple task management
-                application.
-            </p>
-
-            <p>
-                Add tasks, set reminders,
-                star important tasks,
-                edit tasks and manage
-                completed tasks.
-            </p>
-
-            <p>
-                Your tasks are stored locally
-                in your browser.
-            </p>
-
-        </div>
-    `;
-
-    saving.classList.add(
-        "savingStyle"
-    );
-}
-
-
-// =====================================================
-// TODAY'S TASK
-// =====================================================
-
-function showToday() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    todo.style.display =
-        "flex";
-
-    starred.style.display =
-        "none";
-
-    currentView =
-        "today";
-
-    const today =
-        new Date();
-
-    const currentDate =
-        today.getFullYear() +
-        "-" +
-        String(
-            today.getMonth() + 1
-        ).padStart(2, "0") +
-        "-" +
-        String(
-            today.getDate()
-        ).padStart(2, "0");
-
-    let found =
-        false;
-
-    todo.querySelectorAll(
-        ".form-check"
-    ).forEach(task => {
-
-        const dateElement =
-            task.querySelector(
-                ".l3"
-            );
-
-        if (!dateElement) {
-
-            task.style.display =
-                "none";
-
-            return;
-        }
-
-        const taskDate =
-            dateElement.innerText
-                .replace(
-                    "Date:",
-                    ""
-                )
-                .trim();
-
-        if (
-            taskDate ===
-            currentDate
-        ) {
-
-            task.style.display =
-                "block";
-
-            found =
-                true;
-
-        } else {
-
-            task.style.display =
-                "none";
-        }
-    });
-
-    if (found) {
-
-        hideEmptyMessage();
-
-    } else {
-
-        showEmptyMessage(
-            "fa-list-check",
-            "No Today's Tasks"
-        );
-    }
-}
-
-
-// =====================================================
-// SORT
-// =====================================================
-
-function sortTasks() {
-
-    const todo =
-        getTodo();
-
-    todo.style.display =
-        "flex";
-
-    getStarred().style.display =
-        "none";
-
-    currentView =
-        "home";
-
-    const tasks =
-        Array.from(
-            todo.querySelectorAll(
-                ".form-check"
-            )
-        );
-
-    tasks.sort((a, b) => {
-
-        const dateA =
-            a.querySelector(".l3")
-                ?.innerText
-                .replace(
-                    "Date:",
-                    ""
-                )
-                .trim() || "";
-
-        const timeA =
-            a.querySelector(".l4")
-                ?.innerText
-                .replace(
-                    "Time:",
-                    ""
-                )
-                .trim() || "";
-
-        const dateB =
-            b.querySelector(".l3")
-                ?.innerText
-                .replace(
-                    "Date:",
-                    ""
-                )
-                .trim() || "";
-
-        const timeB =
-            b.querySelector(".l4")
-                ?.innerText
-                .replace(
-                    "Time:",
-                    ""
-                )
-                .trim() || "";
-
-        return (
-            new Date(
-                `${dateA}T${timeA}`
-            ) -
-            new Date(
-                `${dateB}T${timeB}`
-            )
-        );
-    });
-
-    tasks.forEach(task => {
-
-        task.style.display =
-            "block";
-
-        todo.appendChild(
-            task
-        );
-    });
-
-    savetask();
-
-    hideEmptyMessage();
-
-    addStarEvents();
-    addCheckBoxEvent();
-    addEditEvents();
-}
-
-
-// =====================================================
-// REMINDERS VIEW
-// =====================================================
-
-function showReminders() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    todo.style.display =
-        "flex";
-
-    starred.style.display =
-        "none";
-
-    currentView =
-        "reminders";
-
-    const now =
-        new Date();
-
-    let found =
-        false;
-
-    todo.querySelectorAll(
-        ".form-check"
-    ).forEach(task => {
-
-        const dateElement =
-            task.querySelector(
-                ".l3"
-            );
-
-        const timeElement =
-            task.querySelector(
-                ".l4"
-            );
-
-        if (
-            !dateElement ||
-            !timeElement
-        ) {
-
-            task.style.display =
-                "none";
-
-            return;
-        }
-
-        const date =
-            dateElement.innerText
-                .replace(
-                    "Date:",
-                    ""
-                )
-                .trim();
-
-        const time =
-            timeElement.innerText
-                .replace(
-                    "Time:",
-                    ""
-                )
-                .trim();
-
-        const reminder =
-            new Date(
-                `${date}T${time}`
-            );
-
-        if (
-            reminder >= now
-        ) {
-
-            task.style.display =
-                "block";
-
-            found =
-                true;
-
-        } else {
-
-            task.style.display =
-                "none";
-        }
-    });
-
-    if (found) {
-
-        hideEmptyMessage();
-
-    } else {
-
-        showEmptyMessage(
-            "fa-calendar-days",
-            "No Upcoming Reminders"
-        );
-    }
-}
-
-
-// =====================================================
-// LOAD TASKS
-// =====================================================
-
-function loadtask() {
-
-    const todo =
-        getTodo();
-
-    const starred =
-        getStarred();
-
-    const saved =
-        localStorage.getItem(
-            "todotasks"
-        );
-
-    const savedStar =
-        localStorage.getItem(
-            "startask"
-        );
-
-    if (saved) {
-
-        todo.innerHTML =
-            saved;
-    }
-
-    if (savedStar) {
-
-        starred.innerHTML =
-            savedStar;
-    }
-
-    document.querySelectorAll(
-        ".fa-star"
-    ).forEach(star => {
-
-        star.removeAttribute(
-            "data-star-added"
-        );
-    });
-
-    document.querySelectorAll(
-        ".tasks"
-    ).forEach(checkbox => {
-
-        checkbox.removeAttribute(
-            "data-added"
-        );
-    });
-
-    document.querySelectorAll(
-        ".fa-pen-to-square"
-    ).forEach(edit => {
-
-        edit.removeAttribute(
-            "data-edit-added"
-        );
-    });
-
-    addStarEvents();
-    addCheckBoxEvent();
-    addEditEvents();
-
-    if (
-        !saved &&
-        !savedStar
-    ) {
-
-        todo.innerHTML =
-            "";
-
-        todo.style.display =
-            "none";
-
-        showEmptyMessage(
-            "fa-book-open",
-            "No Tasks Added"
-        );
-
-    } else {
-
-        hideEmptyMessage();
-    }
-
-    showHome();
-}
-
-
-// =====================================================
-// STAR EVENTS
-// =====================================================
-
-function addStarEvents() {
-
-    const todo =
-        getTodo();
-
-    const starredContainer =
-        getStarred();
-
-    const stars =
-        document.querySelectorAll(
-            ".form-check .fa-star"
-        );
-
-    stars.forEach(star => {
-
-        if (
-            star.hasAttribute(
-                "data-star-added"
-            )
-        ) {
-
-            return;
-        }
-
-        star.setAttribute(
-            "data-star-added",
-            "true"
-        );
-
-        star.addEventListener(
-            "click",
-            function () {
-
-                const task =
-                    star.closest(
-                        ".form-check"
-                    );
-
-                if (!task) {
-                    return;
-                }
-
-                if (
-                    !star.classList.contains(
-                        "starStyle"
-                    )
-                ) {
-
-                    playSound(
-                        "star"
-                    );
-
-                    star.classList.remove(
-                        "fa-regular"
-                    );
-
-                    star.classList.add(
-                        "fa-solid"
-                    );
-
-                    star.classList.add(
-                        "starStyle"
-                    );
-
-                    starredContainer.appendChild(
-                        task
-                    );
-
-                } else {
-
-                    playSound(
-                        "unstar"
-                    );
-
-                    star.classList.remove(
-                        "fa-solid"
-                    );
-
-                    star.classList.remove(
-                        "starStyle"
-                    );
-
-                    star.classList.add(
-                        "fa-regular"
-                    );
-
-                    todo.appendChild(
-                        task
-                    );
-                }
-
-                savetask();
-
-                addStarEvents();
-                addCheckBoxEvent();
-                addEditEvents();
-            }
-        );
-    });
-}
-
-
-// =====================================================
-// CHECKBOX / COMPLETE
-// =====================================================
-
-function addCheckBoxEvent() {
-
-    const checkboxes =
-        document.querySelectorAll(
-            ".tasks"
-        );
-
-    checkboxes.forEach(checkbox => {
-
-        if (
-            checkbox.hasAttribute(
-                "data-added"
-            )
-        ) {
-
-            return;
-        }
-
-        checkbox.setAttribute(
-            "data-added",
-            "true"
-        );
-
-        checkbox.addEventListener(
-            "change",
-            function (e) {
-
-                if (
-                    !e.target.checked
-                ) {
-                    return;
-                }
-
-                playSound(
-                    "complete"
-                );
-
-                const task =
-                    e.target.closest(
-                        ".form-check"
-                    );
-
-                if (!task) {
-                    return;
-                }
-
-                const trash =
-                    localStorage.getItem(
-                        "trashtasks"
-                    ) || "";
-
-                const container =
-                    document.createElement(
-                        "div"
-                    );
-
-                container.innerHTML =
-                    trash;
-
-                const trashTask =
-                    task.cloneNode(
-                        true
-                    );
-
-                const trashCheckbox =
-                    trashTask.querySelector(
-                        ".tasks"
-                    );
-
-                if (trashCheckbox) {
-
-                    trashCheckbox.checked =
-                        true;
-
-                    trashCheckbox.disabled =
-                        true;
-                }
-
-                trashTask
-                    .querySelectorAll(
-                        ".fa-star"
-                    )
-                    .forEach(star => {
-
-                        star.removeAttribute(
-                            "data-star-added"
-                        );
-                    });
-
-                trashTask
-                    .querySelectorAll(
-                        ".tasks"
-                    )
-                    .forEach(box => {
-
-                        box.removeAttribute(
-                            "data-added"
-                        );
-                    });
-
-                trashTask
-                    .querySelectorAll(
-                        ".fa-pen-to-square"
-                    )
-                    .forEach(edit => {
-
-                        edit.removeAttribute(
-                            "data-edit-added"
-                        );
-                    });
-
-                container.appendChild(
-                    trashTask
-                );
-
-                localStorage.setItem(
-                    "trashtasks",
-                    container.innerHTML
-                );
-
-                task.remove();
-
-                savetask();
-
-                const message =
-                    document.querySelector(
-                        ".Message1"
-                    );
-
-                const undo =
-                    document.querySelector(
-                        ".btn-link"
-                    );
-
-                message.classList.add(
-                    "show"
-                );
-
-                undo.onclick =
-                    function () {
-
-                        const currentTrash =
-                            localStorage.getItem(
-                                "trashtasks"
-                            ) || "";
-
-                        const trashContainer =
-                            document.createElement(
-                                "div"
-                            );
-
-                        trashContainer.innerHTML =
-                            currentTrash;
-
-                        const originalText =
-                            task.querySelector(
-                                ".l1"
-                            )?.innerText;
-
-                        trashContainer
-                            .querySelectorAll(
-                                ".form-check"
-                            )
-                            .forEach(item => {
-
-                                if (
-                                    item.querySelector(
-                                        ".l1"
-                                    )?.innerText ===
-                                    originalText
-                                ) {
-
-                                    item.remove();
-                                }
-                            });
-
-                        localStorage.setItem(
-                            "trashtasks",
-                            trashContainer.innerHTML
-                        );
-
-                        const originalCheckbox =
-                            task.querySelector(
-                                ".tasks"
-                            );
-
-                        if (
-                            originalCheckbox
-                        ) {
-
-                            originalCheckbox.checked =
-                                false;
-
-                            originalCheckbox.disabled =
-                                false;
-                        }
-
-                        getTodo().prepend(
-                            task
-                        );
-
-                        hideEmptyMessage();
-
-                        savetask();
-
-                        addStarEvents();
-                        addCheckBoxEvent();
-                        addEditEvents();
-
-                        message.classList.remove(
-                            "show"
-                        );
-                    };
-
-                setTimeout(
-                    function () {
-
-                        message.classList.remove(
-                            "show"
-                        );
-
-                    },
-                    5000
-                );
-
-                if (
-                    getTodo().children.length ===
-                    0
-                ) {
-
-                    showEmptyMessage(
-                        "fa-book-open",
-                        "No Tasks Added"
-                    );
-                }
-            }
-        );
-    });
-}
-
-
-// =====================================================
-// EDIT EVENTS
-// =====================================================
-
-function addEditEvents() {
-
-    const editButtons =
-        document.querySelectorAll(
-            ".fa-pen-to-square"
-        );
-
-    editButtons.forEach(edit => {
-
-        if (
-            edit.hasAttribute(
-                "data-edit-added"
-            )
-        ) {
-
-            return;
-        }
-
-        edit.setAttribute(
-            "data-edit-added",
-            "true"
-        );
-
-        edit.addEventListener(
-            "click",
-            function (event) {
-
-                event.stopPropagation();
-
-                playSound(
-                    "edit"
-                );
-
-                const task =
-                    edit.closest(
-                        ".form-check"
-                    );
-
-                if (!task) {
-                    return;
-                }
-
-                openEditForm(
-                    task
-                );
-            }
-        );
-    });
-}
-
-
-// =====================================================
-// EDIT FORM
-// =====================================================
-
-function openEditForm(
-    taskElement
-) {
-
-    const form =
-        document.querySelector(
-            ".con1"
-        );
-
-    const overlay =
-        document.querySelector(
-            ".overlay"
-        );
-
-    const oldTask =
-        taskElement.querySelector(
-            ".l1"
-        )?.innerText || "";
-
-    const oldDate =
-        taskElement.querySelector(
-            ".l3"
-        )?.innerText
-            .replace(
-                "Date:",
-                ""
-            )
-            .trim() || "";
-
-    const oldTime =
-        taskElement.querySelector(
-            ".l4"
-        )?.innerText
-            .replace(
-                "Time:",
-                ""
-            )
-            .trim() || "";
-
-    const oldType =
-        taskElement.querySelector(
-            ".feature"
-        )?.innerText || "";
-
-    const oldReminderId =
-        getReminderId(
-            taskElement
-        );
-
-    overlay.classList.add(
-        "overlay1"
-    );
-
-    form.classList.add(
-        "style1"
-    );
-
-    form.innerHTML = `
-
-        <form class="form1">
-
-            <div class="ip1">
-
-                <a>
-                    What is your task?
-                </a>
-
-                <textarea
-                    class="ip20"
-                >${escapeHTML(
-                    oldTask
-                )}</textarea>
-
-            </div>
-
-
-            <div class="ip1">
-
-                <a>
-                    Pick remainder date
-                    and time
-                </a>
-
-                <input
-                    type="datetime-local"
-                    class="ip21"
-                    value="${oldDate}T${oldTime}"
-                />
-
-            </div>
-
-
-            <div class="ip1">
-
-                <a>
-                    Enter task type
-                </a>
-
-                <input
-                    type="text"
-                    class="ip22"
-                    value="${escapeHTML(
-                        oldType
-                    )}"
-                />
-
-            </div>
-
-
-            <div class="buttons">
-
-                <button
-                    type="button"
-                    class="btn btn-danger editCancel"
-                >
-                    Cancel
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-primary editUpdate"
-                >
-                    Update Task
-                </button>
-
-            </div>
-
-        </form>
-    `;
-
-    form.querySelector(
-        ".editCancel"
-    ).onclick =
-        function () {
-
-            playSound(
-                "cancel"
-            );
-
-            closeForm();
-        };
-
-
-    form.querySelector(
-        ".editUpdate"
-    ).onclick =
-        function () {
-
-            const newTask =
-                form.querySelector(
-                    ".ip20"
-                ).value.trim();
-
-            const newDate =
-                form.querySelector(
-                    ".ip21"
-                ).value;
-
-            const newType =
-                form.querySelector(
-                    ".ip22"
-                ).value.trim();
-
-            if (
-                newTask === "" ||
-                newDate === "" ||
-                newType === ""
-            ) {
-
-                alert(
-                    "Please fill all the fields."
-                );
-
-                return;
-            }
-
-            const datetime =
-                newDate.split(
-                    "T"
-                );
-
-            const dateObject =
-                new Date(
-                    datetime[0]
-                );
-
-            const days = [
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday"
-            ];
-
-            const day =
-                days[
-                    dateObject.getDay()
-                ];
-
-            taskElement.querySelector(
-                ".l1"
-            ).innerText =
-                newTask;
-
-            taskElement.querySelector(
-                ".l2"
-            ).innerText =
-                `Day:${day}`;
-
-            taskElement.querySelector(
-                ".l3"
-            ).innerText =
-                `Date:${datetime[0]}`;
-
-            taskElement.querySelector(
-                ".l4"
-            ).innerText =
-                `Time:${datetime[1]}`;
-
-            taskElement.querySelector(
-                ".feature"
-            ).innerText =
-                newType;
-
-            let notified =
-                JSON.parse(
-                    localStorage.getItem(
-                        "notifiedReminders"
-                    ) || "[]"
-                );
-
-            notified =
-                notified.filter(
-                    id =>
-                        id !==
-                        oldReminderId
-                );
-
-            localStorage.setItem(
-                "notifiedReminders",
-                JSON.stringify(
-                    notified
-                )
-            );
-
-            savetask();
-
-            playSound(
-                "update"
-            );
-
-            closeForm();
-
-            addStarEvents();
-            addCheckBoxEvent();
-            addEditEvents();
-
-            showNotification(
-                "Task Updated",
-                "Your task was successfully updated."
-            );
-        };
-}
-
-
-// =====================================================
-// ADD TASK
-// =====================================================
-
-function addchecks() {
-
-    requestNotificationPermission();
-
-    const data =
-        getTodo();
-
-    const form =
-        document.querySelector(
-            ".con1"
-        );
-
-    const overlay =
-        document.querySelector(
-            ".overlay"
-        );
-
-    overlay.classList.add(
-        "overlay1"
-    );
-
-    form.classList.add(
-        "style1"
-    );
-
-    form.innerHTML = `
-
-        <form class="form1">
-
-            <div class="ip1">
-
-                <a>
-                    What is your task?
-                </a>
-
-                <textarea
-                    placeholder="Enter task here"
-                    class="ip20"
-                ></textarea>
-
-            </div>
-
-
-            <div class="ip1">
-
-                <a>
-                    Pick remainder date
-                    and time
-                </a>
-
-                <input
-                    type="datetime-local"
-                    class="ip21"
-                />
-
-            </div>
-
-
-            <div class="ip1">
-
-                <a>
-                    Enter task type
-                </a>
-
-                <input
-                    type="text"
-                    placeholder="Enter here"
-                    class="ip22"
-                />
-
-            </div>
-
-
-            <div class="buttons">
-
-                <button
-                    type="button"
-                    class="btn btn-danger"
-                    id="cancelTask"
-                >
-                    Cancel
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    id="saveTask"
-                >
-                    Save Task
-                </button>
-
-            </div>
-
-        </form>
-    `;
-
-    form.querySelector(
-        "#cancelTask"
-    ).onclick =
-        function () {
-
-            playSound(
-                "cancel"
-            );
-
-            closeForm();
-        };
-
-
-    form.querySelector(
-        "#saveTask"
-    ).onclick =
-        function () {
-
-            const task =
-                form.querySelector(
-                    ".ip20"
-                ).value.trim();
-
-            const date =
-                form.querySelector(
-                    ".ip21"
-                ).value;
-
-            const type =
-                form.querySelector(
-                    ".ip22"
-                ).value.trim();
-
-            if (
-                task === "" ||
-                date === "" ||
-                type === ""
-            ) {
-
-                alert(
-                    "Please fill all the fields."
-                );
-
-                return;
-            }
-
-            const datetime =
-                date.split(
-                    "T"
-                );
-
-            const dateObject =
-                new Date(
-                    datetime[0]
-                );
-
-            const days = [
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday"
-            ];
-
-            const day =
-                days[
-                    dateObject.getDay()
-                ];
-
-            data.insertAdjacentHTML(
-                "beforeend",
-                `
-
-                <div class="form-check">
-
-                    <input
-                        class="form-check-input tasks"
-                        type="checkbox"
-                    >
-
-
-                    <div class="taskContent">
-
-                        <label
-                            class="form-check-label l1 colaps"
-                        >
-                            ${escapeHTML(task)}
-                        </label>
-
-
-                        <hr>
-
-
-                        <label
-                            class="form-check-label l2"
-                        >
-                            Day:${day}
-                        </label>
-
-
-                        <br>
-
-
-                        <label
-                            class="form-check-label l3"
-                        >
-                            Date:${datetime[0]}
-                        </label>
-
-
-                        <br>
-
-
-                        <label
-                            class="form-check-label l4"
-                        >
-                            Time:${datetime[1]}
-                        </label>
-
-
-                        <div class="extra">
-
-                            <button
-                                type="button"
-                                class="feature"
-                            >
-                                ${escapeHTML(type)}
-                            </button>
-
-
-                            <div class="extra1">
-
-                                <i
-                                    class="fa-regular fa-star"
-                                ></i>
-
-                            </div>
-
-
-                            <div class="extra2">
-
-                                <i
-                                    class="fa-regular fa-pen-to-square"
-                                ></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-                `
-            );
-
-            savetask();
-
-            hideEmptyMessage();
-
-            closeForm();
-
-            playSound(
-                "save"
-            );
-
-            addStarEvents();
-            addCheckBoxEvent();
-            addEditEvents();
-
-            showHome();
-
-            showNotification(
-                "Task Added",
-                "Your new task has been saved."
-            );
-        };
-}
-
-
-// =====================================================
-// TRASH PREPARATION
-// =====================================================
-
-function prepareTrashTasks() {
-
-    const trash =
-        localStorage.getItem(
-            "trashtasks"
-        );
-
-    if (!trash) {
-        return;
-    }
-
-    const container =
-        document.createElement(
-            "div"
-        );
-
-    container.innerHTML =
-        trash;
-
-    container.querySelectorAll(
-        ".form-check"
-    ).forEach(task => {
-
-        if (
-            task.querySelector(
-                ".trashButtons"
-            )
-        ) {
-            return;
-        }
-
-        const buttons =
-            document.createElement(
-                "div"
-            );
-
-        buttons.className =
-            "trashButtons";
-
-        buttons.innerHTML = `
-
-            <button
-                type="button"
-                class="restoreTask btn btn-success btn-sm"
-            >
-                <i
-                    class="fa-solid fa-rotate-left"
-                ></i>
-
-                Restore
-            </button>
-
-
-            <button
-                type="button"
-                class="deleteTask btn btn-danger btn-sm"
-            >
-                <i
-                    class="fa-solid fa-trash"
-                ></i>
-
-                Delete
-            </button>
-
-        `;
-
-        task.appendChild(
-            buttons
-        );
-    });
-
-    localStorage.setItem(
-        "trashtasks",
-        container.innerHTML
-    );
-}
-
-
-// =====================================================
-// TRASH EVENTS
-// =====================================================
-
-function addTrashEvents() {
-
-    const todo =
-        getTodo();
-
-
-    todo.querySelectorAll(
-        ".restoreTask"
-    ).forEach(button => {
-
-        if (
-            button.hasAttribute(
-                "data-added"
-            )
-        ) {
-            return;
-        }
-
-        button.setAttribute(
-            "data-added",
-            "true"
-        );
-
-        button.onclick =
-            function () {
-
-                playSound(
-                    "restore"
-                );
-
-                const task =
-                    button.closest(
-                        ".form-check"
-                    );
-
-                if (!task) {
-                    return;
-                }
-
-                const trash =
-                    localStorage.getItem(
-                        "trashtasks"
-                    ) || "";
-
-                const container =
-                    document.createElement(
-                        "div"
-                    );
-
-                container.innerHTML =
-                    trash;
-
-                const taskText =
-                    task.querySelector(
-                        ".l1"
-                    )?.innerText;
-
-                container.querySelectorAll(
-                    ".form-check"
-                ).forEach(item => {
-
-                    if (
-                        item.querySelector(
-                            ".l1"
-                        )?.innerText ===
-                        taskText
-                    ) {
-
-                        item.remove();
-                    }
-                });
-
-                localStorage.setItem(
-                    "trashtasks",
-                    container.innerHTML
-                );
-
-                const checkbox =
-                    task.querySelector(
-                        ".tasks"
-                    );
-
-                if (checkbox) {
-
-                    checkbox.checked =
-                        false;
-
-                    checkbox.disabled =
-                        false;
-                }
-
-                task.querySelector(
-                    ".trashButtons"
-                )?.remove();
-
-                getTodo().appendChild(
-                    task
-                );
-
-                savetask();
-
-                hideEmptyMessage();
-
-                addStarEvents();
-                addCheckBoxEvent();
-                addEditEvents();
-
-                showNotification(
-                    "Task Restored",
-                    "The task has been restored."
-                );
-
-                if (
-                    getTodo().children.length ===
-                    0
-                ) {
-
-                    showEmptyMessage(
-                        "fa-trash",
-                        "Trash is Empty"
-                    );
-                }
-            };
-    });
-
-
-    todo.querySelectorAll(
-        ".deleteTask"
-    ).forEach(button => {
-
-        if (
-            button.hasAttribute(
-                "data-added"
-            )
-        ) {
-            return;
-        }
-
-        button.setAttribute(
-            "data-added",
-            "true"
-        );
-
-        button.onclick =
-            function () {
-
-                playSound(
-                    "delete"
-                );
-
-                const task =
-                    button.closest(
-                        ".form-check"
-                    );
-
-                if (!task) {
-                    return;
-                }
-
-                task.remove();
-
-                localStorage.setItem(
-                    "trashtasks",
-                    todo.innerHTML
-                );
-
-                showNotification(
-                    "Task Deleted",
-                    "The task was permanently deleted."
-                );
-
-                if (
-                    todo.children.length ===
-                    0
-                ) {
-
-                    showEmptyMessage(
-                        "fa-trash",
-                        "Trash is Empty"
-                    );
-                }
-            };
     });
 }
 
@@ -2731,18 +1605,20 @@ function App() {
 
     useEffect(() => {
 
-        loadtask();
+        loadTasks();
+        prepareTrash();
+        navigation();
 
-        prepareTrashTasks();
+        askNotification();
 
-        addNavigationEvents();
-
-        startReminderChecker();
+        reminderTimer =
+            setInterval(
+                checkReminders,
+                1000
+            );
 
         return () => {
-
             if (reminderTimer) {
-
                 clearInterval(
                     reminderTimer
                 );
@@ -2750,7 +1626,6 @@ function App() {
         };
 
     }, []);
-
 
     return (
         <>
@@ -2765,7 +1640,6 @@ function App() {
                         Regular Task
                     </label>
 
-
                     <button
                         className="navbar-toggler"
                         type="button"
@@ -2773,11 +1647,7 @@ function App() {
                         data-bs-target="#offcanvasDarkNavbar"
                         aria-controls="offcanvasDarkNavbar"
                     >
-
-                        <span
-                            className="navbar-toggler-icon"
-                        ></span>
-
+                        <span className="navbar-toggler-icon"></span>
                     </button>
 
 
@@ -2787,14 +1657,11 @@ function App() {
                         id="offcanvasDarkNavbar"
                     >
 
-                        <div
-                            className="offcanvas-header"
-                        >
+                        <div className="offcanvas-header">
 
                             <h5 className="offcanvas-title">
                                 Menu List
                             </h5>
-
 
                             <button
                                 type="button"
@@ -2854,9 +1721,7 @@ function App() {
 
                                     <div className="navb">
 
-                                        <i
-                                            className="fa-solid fa-plus"
-                                        ></i>
+                                        <i className="fa-solid fa-plus"></i>
 
                                         <button
                                             type="button"
@@ -2874,9 +1739,7 @@ function App() {
 
                                     <div className="navb">
 
-                                        <i
-                                            className="fa-solid fa-recycle"
-                                        ></i>
+                                        <i className="fa-solid fa-recycle"></i>
 
                                         <button
                                             type="button"
@@ -2894,9 +1757,7 @@ function App() {
 
                                     <div className="navb">
 
-                                        <i
-                                            className="fa-solid fa-circle-info"
-                                        ></i>
+                                        <i className="fa-solid fa-circle-info"></i>
 
                                         <button
                                             type="button"
@@ -2914,9 +1775,7 @@ function App() {
 
                                     <div className="navb">
 
-                                        <i
-                                            className="fa-solid fa-list-check"
-                                        ></i>
+                                        <i className="fa-solid fa-list-check"></i>
 
                                         <button
                                             type="button"
@@ -2934,9 +1793,7 @@ function App() {
 
                                     <div className="navb">
 
-                                        <i
-                                            className="fa-solid fa-arrow-up-wide-short"
-                                        ></i>
+                                        <i className="fa-solid fa-arrow-up-wide-short"></i>
 
                                         <button
                                             type="button"
@@ -2954,9 +1811,7 @@ function App() {
 
                                     <div className="navb">
 
-                                        <i
-                                            className="fa-solid fa-calendar-days"
-                                        ></i>
+                                        <i className="fa-solid fa-calendar-days"></i>
 
                                         <button
                                             type="button"
@@ -2984,24 +1839,12 @@ function App() {
 
                 <i
                     className="fa-solid fa-circle-plus disl"
-                    onClick={() => {
-
-                        playSound(
-                            "add"
-                        );
-
-                        requestNotificationPermission();
-
-                        addchecks();
-                    }}
                 ></i>
 
             </div>
 
 
-            <div
-                className="saving savingStyle"
-            >
+            <div className="saving savingStyle">
 
                 <i
                     className="fa-solid fa-book-open"
@@ -3019,6 +1862,7 @@ function App() {
 
             <div className="con1"></div>
 
+
             <div className="overlay"></div>
 
 
@@ -3027,7 +1871,6 @@ function App() {
                 <div className="text1">
                     Task is finished
                 </div>
-
 
                 <div className="textbt">
 
@@ -3048,6 +1891,5 @@ function App() {
         </>
     );
 }
-
 
 export default App;
