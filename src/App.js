@@ -1637,7 +1637,7 @@ function App() {
                 <div className="container-fluid">
 
                     <label className="navbar-brand">
-                        Regular Task
+                        Regular Tasks
                     </label>
 
                     <button
